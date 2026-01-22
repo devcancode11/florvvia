@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Florvvia | Handmade Flowers & Crochet Gifts</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Animate on Scroll -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Poppins', sans-serif; }
+  </style>
+  <link rel="stylesheet" href="css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+
+<body class="bg-[#fffaf8] text-gray-700">
+
+<!-- NAVBAR -->
+<nav class="flex items-center justify-between px-6 py-4 shadow-sm bg-white">
+  <h1 class="text-2xl font-semibold text-pink-500">florvvia</h1>
+  <div class="space-x-6 hidden md:block">
+    <a href="#home" class="hover:text-pink-400">Home</a>
+    <a href="#products" class="hover:text-pink-400">Products</a>
+    <a href="#contact" class="hover:text-pink-400">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="home" class="flex flex-col md:flex-row items-center justify-between px-6 py-16 gap-10" data-aos="fade-up">
+  <div class="md:w-1/2">
+    <h2 class="text-4xl md:text-5xl font-semibold text-pink-500 mb-4">
+      Handmade Flowers & Crochet Gifts
+    </h2>
+    <p class="mb-6">
+      Delicate pipe-cleaner flowers, bouquets and crochet keepsakes —
+      handmade with love for every occasion.
+    </p>
+    <a href="#products"
+       class="inline-block bg-pink-400 text-white px-6 py-3 rounded-full hover:bg-pink-500 transition">
+      View Collection
+    </a>
+  </div>
+
+  <div class="md:w-1/2 flex justify-center">
+    <img src="images/hero.png"
+         alt="Florvvia handmade flowers"
+         class="w-80 rounded-xl shadow-lg">
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products" class="px-6 py-16 bg-white" data-aos="fade-up">
+  <h3 class="text-3xl text-center text-pink-500 font-semibold mb-10">
+    Our Creations
+  </h3>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+    <!-- Flowers -->
+    <div class="bg-[#fffaf8] rounded-xl shadow-md overflow-hidden hover:scale-105 transition">
+      <a href="flower.html">
+      <img src="images/flowers/flower1.jpg"
+           class="w-full h-64 object-cover">
+      </a>
+      <div class="p-4">
+        <h4 class="text-lg font-medium">Pipe-cleaner Flowers</h4>
+        <p class="text-sm text-gray-500 mb-3">Colorful everlasting blooms</p>
+        <a href="flower.html" class="text-pink-400 hover:underline">View Now →</a>
+      </div>
+    </div>
+
+    <!-- Bouquets -->
+    <div class="bg-[#fffaf8] rounded-xl shadow-md overflow-hidden hover:scale-105 transition">
+      <a href="bouquet.html">
+      <img src="images/bouquets/bouquet1.jpg"
+           class="w-full h-64 object-cover">
+      </a>
+      <div class="p-4">
+        <h4 class="text-lg font-medium">Bouquets</h4>
+        <p class="text-sm text-gray-500 mb-3">Perfect for gifting</p>
+        <a href="bouquet.html" class="text-pink-400 hover:underline">View Now →</a>
+      </div>
+    </div>
+
+    <!-- Keychains -->
+    <div class="bg-[#fffaf8] rounded-xl shadow-md overflow-hidden hover:scale-105 transition">
+      <a href="keychain.html">
+      <img src="images/keychains/keychain1.jpg"
+           class="w-full h-64 object-cover">
+      </a>
+      <div class="p-4">
+        <h4 class="text-lg font-medium"> Keychains and Clips</h4>
+        <p class="text-sm text-gray-500 mb-3">Cute handmade keepsakes</p>
+        <a href="keychain.html" class="text-pink-400 hover:underline">View Now →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="contact" class="text-center py-6 text-sm text-gray-400 bg-white">
+  © 2026 Florvvia • Handmade with love 🌸  
+  <br>
+  Instagram: @florvvia
+</footer>
+
+<!-- AOS Script -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init({
+    duration: 900,
+    once: true
+  });
+</script>
+
+</body>
+</html>

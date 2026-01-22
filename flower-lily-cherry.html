@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Florvvia | Pipe-cleaner Cherry Lily</title>
+
+  <!-- Responsive -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-[#fffaf8] text-gray-700">
+
+<section class="px-6 py-10 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
+
+  <!-- IMAGE GALLERY -->
+  <div class="gallery relative">
+
+
+     <!-- TAG -->
+  <span class="absolute top-4 left-4 bg-pink-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
+    New
+  </span>
+
+
+    <!-- Main Image -->
+    <img id="mainImage"
+         src="images/flowers/lily-cherry1.jpg"
+         class="gallery-main">
+
+    <!-- Thumbnails -->
+    <div class="gallery-thumbs">
+      <img src="images/flowers/lily-cherry1.jpg" onclick="changeImage(this.src)">
+      <img src="images/flowers/lily-cherry2.jpg" onclick="changeImage(this.src)">
+      <img src="images/flowers/lily-cherry3.jpg" onclick="changeImage(this.src)">
+    </div>
+
+  </div>
+
+  <!-- DETAILS -->
+  <div>
+
+    <!-- PRODUCT CODE -->
+    <p class="text-sm text-gray-500 mb-2">
+      Product Code: FL-LILY-CHERRY-01
+    </p>
+
+    <h1 class="text-3xl font-semibold text-pink-500 mb-3">
+      Pipe-cleaner Cherry Lily
+    </h1>
+
+    <!-- PRICE -->
+    <div class="product-price">₹119</div>
+
+    <p class="mb-4">
+      Beautiful handmade cherry-colored pipe-cleaner lily that never fades.
+      A perfect choice for romantic gifts, decor, and special moments.
+    </p>
+
+    <p class="mb-6 font-medium">
+      Custom colors & bouquet options available 🍒
+    </p>
+
+    <!-- ORDER BUTTONS -->
+    <a href="https://wa.me/917417566249?text=Hi%20Florvvia%20🌸%0AI%20want%20to%20order%20Pipe-cleaner%20Cherry%20Lily%0AProduct%20page:%20flower-lily-cherry.html"
+       target="_blank"
+       class="block mb-3 bg-green-500 text-white px-6 py-3 rounded-full text-center">
+      Order on WhatsApp
+    </a>
+
+    <a href="https://ig.me/m/florvvia?text=Hi%20Florvvia%20🌸%20I%20want%20to%20order%20Pipe-cleaner%20Cherry%20Lily"
+       target="_blank"
+       class="block bg-pink-400 text-white px-6 py-3 rounded-full text-center">
+      Order on Instagram
+    </a>
+
+    <!-- BACK -->
+    <a href="flower.html"
+       class="block mt-6 text-sm text-pink-400 hover:underline">
+      ← Back to Flowers
+    </a>
+
+  </div>
+
+</section>
+
+<!-- Image Switch Script -->
+<script>
+  function changeImage(src) {
+    document.getElementById("mainImage").src = src;
+  }
+</script>
+
+</body>
+</html>

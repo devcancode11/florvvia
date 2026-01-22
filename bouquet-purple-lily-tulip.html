@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Florvvia | Purple Lily & Tulip Bouquet</title>
+
+  <!-- Responsive -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-[#fffaf8] text-gray-700">
+
+<section class="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-2 gap-10">
+
+  <!-- IMAGE GALLERY -->
+  <div>
+    <img id="mainImage"
+         src="images/bouquets/purple-lily-tulip1.jpg"
+         class="gallery-main">
+
+    <div class="gallery-thumbs">
+      <img src="images/bouquets/purple-lily-tulip1.jpg" onclick="changeImage(this.src)">
+      <img src="images/bouquets/purple-lily-tulip2.jpg" onclick="changeImage(this.src)">
+      <img src="images/bouquets/purple-lily-tulip3.jpg" onclick="changeImage(this.src)">
+    </div>
+  </div>
+<!-- IMAGE GALLERY -->
+<div class="relative">
+
+  <!-- TAG -->
+  <span class="absolute top-4 left-4 bg-pink-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
+    Bouquet
+  </span>
+
+  <!-- Main Image -->
+  <img id="mainImage"
+       src="images/bouquets/purple-lily-tulip1.jpg"
+       class="gallery-main">
+
+  <!-- Thumbnails -->
+  <div class="gallery-thumbs">
+    <img src="images/bouquets/purple-lily-tulip1.jpg" onclick="changeImage(this.src)">
+    <img src="images/bouquets/purple-lily-tulip2.jpg" onclick="changeImage(this.src)">
+    <img src="images/bouquets/purple-lily-tulip3.jpg" onclick="changeImage(this.src)">
+  </div>
+
+</div>
+
+  <!-- DETAILS -->
+  <div>
+    <h1 class="text-3xl font-semibold text-pink-500 mb-3">
+      Purple Lily & Tulip Bouquet
+    </h1>
+
+    <p class="mb-4">
+      Elegant handmade bouquet featuring purple lilies and pastel tulips.  
+      Aesthetic, everlasting, and perfect for gifting on special occasions.
+    </p>
+
+    <p class="mb-4 font-medium">
+      Custom color combinations available 🌸
+    </p>
+
+    <!-- PRICE TAG -->
+    <div class="inline-block bg-pink-100 text-pink-600 px-4 py-2 rounded-full mb-6">
+      Price: Write on tag ✨
+    </div>
+
+    <!-- ORDER BUTTONS -->
+    <a href="https://wa.me/917417566249?text=Hi%20Florvvia%20🌸%0AI%20want%20to%20order%20Purple%20Lily%20and%20Tulip%20Bouquet%0AProduct%20page:%20bouquet-purple-lily-tulip.html"
+       target="_blank"
+       class="block mb-3 bg-green-500 text-white px-6 py-3 rounded-full text-center">
+      Order on WhatsApp
+    </a>
+
+    <a href="https://ig.me/m/florvvia?text=Hi%20Florvvia%20🌸%20I%20want%20to%20order%20Purple%20Lily%20and%20Tulip%20Bouquet"
+       target="_blank"
+       class="block bg-pink-400 text-white px-6 py-3 rounded-full text-center">
+      Order on Instagram
+    </a>
+
+    <!-- BACK -->
+    <a href="bouquet.html" class="block mt-6 text-sm text-pink-400">
+      ← Back to Bouquets
+    </a>
+  </div>
+
+</section>
+
+<script>
+  function changeImage(src) {
+    document.getElementById("mainImage").src = src;
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Florvvia | Pipe-cleaner Tulip</title>
+  <p class="text-sm text-gray-500 mb-2">Product Code: FL-TULIP-01</p>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+
+<body class="bg-[#fffaf8] text-gray-700">
+
+<section class="px-6 py-10 max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
+
+  <!-- IMAGES -->
+ <!-- IMAGE GALLERY -->
+<div class="gallery relative">
+
+
+   <!-- TAG -->
+  <span class="absolute top-4 left-4 bg-pink-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
+   New
+  </span>
+
+
+  <!-- Main Image -->
+  <img id="mainImage"
+       src="images/flowers/tulip1.jpg"
+       class="gallery-main">
+
+  <!-- Thumbnails -->
+  <div class="gallery-thumbs">
+    <img src="images/flowers/tulip1.jpg"
+         onclick="changeImage(this.src)">
+    <img src="images/flowers/tulip2.jpg"
+         onclick="changeImage(this.src)">
+  </div>
+
+</div>
+
+
+  <!-- DETAILS -->
+  <div>
+
+    <h1 class="text-3xl font-semibold text-pink-500 mb-2">
+      Pipe-cleaner Tulip
+    </h1>
+
+    <!-- PRICE -->
+    <div class="product-price">₹799</div>
+
+    <p class="mb-4">
+      Handmade pipe-cleaner tulip that never fades.  
+      Perfect for gifting, decor, and surprises.
+    </p>
+
+    <p class="mb-6 font-medium">
+      Custom colors available 🌸
+    </p>
+
+    <!-- ORDER BUTTONS -->
+    <a href="https://wa.me/91XXXXXXXXXX"
+       class="block mb-3 bg-green-500 text-white px-6 py-3 rounded-full text-center">
+      Order on WhatsApp
+    </a>
+
+   <a href="https://www.instagram.com/direct/new/"
+   target="_blank"
+   onclick="copyInstaMessage()"
+   class="block bg-pink-400 text-white px-6 py-3 rounded-full text-center">
+  Order on Instagram
+</a>
+
+
+    <a href="flower.html" class="block mt-6 text-sm text-pink-400">
+      ← Back to Flowers
+    </a>
+  </div>
+
+</section>
+<script>
+  function changeImage(src) {
+    document.getElementById("mainImage").src = src;
+  }
+</script>
+
+</body>
+</html>

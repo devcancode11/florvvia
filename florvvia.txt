@@ -1,0 +1,10 @@
+florvvia 
+
+update order buttons in each item.html file 
+add website link in each order item.html
+91YOURNUMBER → your WhatsApp number
+yourwebsite.com → later when deployed
+
+<span class="product-tag">Bestseller</span>
+
+remove 0 form bouquets to add them
