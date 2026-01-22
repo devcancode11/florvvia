@@ -255,3 +255,47 @@ img {
   border-radius: 6px;
   font-size: 0.8rem;
 }
+
+/* ---------- MOBILE OPTIMIZATION ---------- */
+@media (max-width: 640px) {
+
+  /* Product page main image */
+  .gallery-main {
+    height: 260px;
+    object-fit: cover;
+  }
+
+  /* Category images (grid cards) */
+  .category-img {
+    height: 180px;
+    object-fit: cover;
+  }
+
+  /* Reduce page padding */
+  section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Reduce heading size */
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  /* Price spacing */
+  .product-price {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .gallery-thumbs img {
+    width: 60px;
+    height: 60px;
+  }
+}
