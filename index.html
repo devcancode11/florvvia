@@ -25,14 +25,73 @@
 <body class="bg-[#fffaf8] text-gray-700">
 
 <!-- NAVBAR -->
-<nav class="flex items-center justify-between px-6 py-4 shadow-sm bg-white">
-  <h1 class="text-2xl font-semibold text-pink-500">florvvia</h1>
-  <div class="space-x-6 hidden md:block">
-    <a href="#home" class="hover:text-pink-400">Home</a>
-    <a href="#products" class="hover:text-pink-400">Products</a>
-    <a href="#contact" class="hover:text-pink-400">Contact</a>
+<!-- NAVBAR -->
+<header class="bg-white shadow-sm sticky top-0 z-50">
+
+  <!-- Top row: logo + icons -->
+  <div class="flex items-center justify-between px-6 py-3 border-b border-gray-100">
+    <h1 class="text-2xl font-semibold text-pink-500">florvvia</h1>
+
+    <div class="flex items-center gap-5">
+      <!-- Search -->
+      <button aria-label="Search" class="text-gray-600 hover:text-pink-400 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+
+      <!-- Wishlist -->
+      <button aria-label="Wishlist" class="text-gray-600 hover:text-pink-400 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 21s-7.5-4.6-10-9.3C.5 8.1 2.4 5 5.6 5c1.8 0 3.3.9 4.4 2.4C11.1 5.9 12.6 5 14.4 5 17.6 5 19.5 8.1 22 11.7 19.5 16.4 12 21 12 21z"></path>
+        </svg>
+      </button>
+
+      <!-- Profile -->
+      <button aria-label="Account" class="text-gray-600 hover:text-pink-400 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="8" r="3.5"></circle>
+          <path d="M4.5 20c1.5-3.5 5-5 7.5-5s6 1.5 7.5 5"></path>
+        </svg>
+      </button>
+
+      <!-- Cart -->
+      <button aria-label="Cart" class="relative text-gray-600 hover:text-pink-400 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path d="M3 6h2l1.5 11.5A2 2 0 0 0 8.5 19h9a2 2 0 0 0 2-1.7L21 8H6"></path>
+          <circle cx="9" cy="21.5" r="1"></circle>
+          <circle cx="18" cy="21.5" r="1"></circle>
+        </svg>
+        <span class="absolute -top-1.5 -right-1.5 bg-pink-400 text-white text-[10px] leading-none rounded-full w-4 h-4 flex items-center justify-center">0</span>
+      </button>
+    </div>
   </div>
-</nav>
+
+  <!-- Collection scroll row -->
+  <div class="relative flex items-center px-6 py-2 bg-white">
+    <div id="collectionScroll" class="flex gap-6 overflow-x-auto scroll-smooth" style="scrollbar-width:none; -ms-overflow-style:none;">
+      <a href="#home" class="whitespace-nowrap text-sm font-medium text-gray-600 hover:text-pink-400 transition">Home</a>
+      <a href="flower.html" class="whitespace-nowrap text-sm font-medium text-gray-600 hover:text-pink-400 transition">Flowers</a>
+      <a href="bouquet.html" class="whitespace-nowrap text-sm font-medium text-gray-600 hover:text-pink-400 transition">Bouquets</a>
+      <a href="#all-products" class="whitespace-nowrap text-sm font-medium text-gray-600 hover:text-pink-400 transition">Best Sellers</a>
+      <a href="#all-products" class="whitespace-nowrap text-sm font-medium text-gray-600 hover:text-pink-400 transition">New Arrivals</a>
+      <a href="#contact" class="whitespace-nowrap text-sm font-medium text-gray-600 hover:text-pink-400 transition">Contact</a>
+    </div>
+
+    <button onclick="document.getElementById('collectionScroll').scrollBy({left:150, behavior:'smooth'})"
+            aria-label="Scroll collections"
+            class="ml-2 flex-shrink-0 bg-white shadow-md border border-gray-100 rounded-full w-8 h-8 flex items-center justify-center text-pink-400 hover:bg-pink-50 transition">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <polyline points="9 6 15 12 9 18"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <style>
+    #collectionScroll::-webkit-scrollbar { display: none; }
+  </style>
+</header>
 
 <!-- HERO -->
 <section id="home" class="flex flex-col md:flex-row items-center justify-between px-6 py-16 gap-10" data-aos="fade-up">
