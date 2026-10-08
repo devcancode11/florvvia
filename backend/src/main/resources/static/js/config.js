@@ -4,4 +4,4 @@
 //   e.g. window.FLORVVIA_API_URL = 'https://florvvia-backend.onrender.com';
 //   then redeploy the site. No trailing slash.
 // (Tip: opening any page with ?api=https://your-backend-url saves it for this browser.)
-window.FLORVVIA_API_URL = '';
+window.FLORVVIA_API_URL = 'https://florvvia-backend.onrender.com';
