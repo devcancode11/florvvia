@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Florvvia | Handmade Pipe-cleaner Flowers & Gifts</title>
+<link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
@@ -21,7 +24,7 @@
       <p class="mt-1 sm:mt-2 text-xs sm:text-base text-gray-500">Flowers, bouquets & keychains — handmade with love.</p>
     </div>
     <div class="flex-shrink-0">
-      <img src="images/hero.png" onerror="this.src='images/flowers/flower1.jpg'" alt="Florvvia" class="w-28 sm:w-56 md:w-80 rounded-2xl shadow-lg object-cover">
+      <img src="images/hero.jpg" fetchpriority="high" decoding="async" onerror="this.src='images/flowers/flower1.jpg'" alt="Florvvia" class="w-28 sm:w-56 md:w-80 rounded-2xl shadow-lg object-cover">
     </div>
   </div>
   <div class="flex gap-2 sm:gap-3 mt-3 sm:mt-5">
@@ -79,7 +82,8 @@
 <script>
 let ALL = [];
 async function init() {
-  await loadConfig();
+  const [, prods] = await Promise.all([loadConfig(), fetchProducts()]); // parallel: config + products
+  ALL = prods;
   const qs = new URLSearchParams(location.search);
   const fCat = document.getElementById('fCat'), fTag = document.getElementById('fTag'), fSearch = document.getElementById('fSearch');
   fCat.value = qs.get('cat') || 'all';
@@ -88,7 +92,6 @@ async function init() {
   document.querySelectorAll('.catBtn').forEach(b => b.onclick = () => { fCat.value = b.dataset.cat; render(); document.getElementById('shop').scrollIntoView({behavior:'smooth'}); });
   [fCat, fTag].forEach(el => el.onchange = render);
   fSearch.oninput = render;
-  ALL = await fetchProducts();
   document.getElementById('backendNote').textContent = BACKEND_OK ? '● Live store connected' : '○ Demo mode — run backend for cart/login/orders';
   render();
 }
@@ -98,7 +101,7 @@ function card(p) {
   <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover relative">
     ${p.tag ? `<span class="product-tag">${p.tag}</span>` : ''}
     <span class="price-badge">${money(p.price)}</span>
-    <a href="product.html?id=${p.id}"><img src="${img}" loading="lazy" class="category-img" onerror="this.src='images/flowers/flower1.jpg'"></a>
+    <a href="product.html?id=${p.id}"><img src="${img}" loading="lazy" decoding="async" class="category-img" onerror="this.src='images/flowers/flower1.jpg'"></a>
     <div class="p-2 sm:p-3">
       <h4 class="text-[13px] sm:text-sm font-medium line-clamp-2 min-h-[2.5em]">${p.name}</h4>
       <p class="text-[11px] sm:text-xs text-gray-400 capitalize">${catLabel(p.category)} ${p.ratingAvg ? '• ★' + p.ratingAvg : ''}</p>

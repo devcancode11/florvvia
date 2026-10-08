@@ -36,6 +36,7 @@ const DEMO_PRODUCTS = [
 
 let BACKEND_OK = true;
 let SHOP_CONFIG = { whatsappNumber: '917417566249', freeDeliveryAbove: 999, deliveryFee: 49, upiId: 'florvvia@upi' };
+let _prodsCache = null, _prodsCacheAt = 0, _prodsInflight = null;
 
 async function loadConfig() {
   try { const c = await API.get('/api/config'); SHOP_CONFIG = { ...SHOP_CONFIG, ...c }; }
@@ -44,9 +45,21 @@ async function loadConfig() {
 
 async function fetchProducts(params = {}) {
   const q = new URLSearchParams(params).toString();
+  const now = Date.now();
+  // serve repeat loads from a 60s in-memory cache (one shared request, no waterfall)
+  if (!q && _prodsCache && now - _prodsCacheAt < 60000) { BACKEND_OK = true; return _prodsCache; }
+  if (!q && _prodsInflight) { try { return await _prodsInflight; } catch {} }
   try {
-    const list = await API.get('/api/products' + (q ? '?' + q : ''));
+    let list;
+    if (!q) {
+      _prodsInflight = API.get('/api/products');
+      try { list = await _prodsInflight; }
+      finally { _prodsInflight = null; }
+    } else {
+      list = await API.get('/api/products?' + q);
+    }
     BACKEND_OK = true;
+    if (!q) { _prodsCache = list; _prodsCacheAt = now; }
     return list;
   } catch {
     BACKEND_OK = false;
@@ -118,11 +131,18 @@ async function toggleWishlist(productId) {
 }
 
 async function updateBadges() {
-  const cart = await getCart().catch(() => []);
-  const wish = await getWishlist().catch(() => []);
-  const cq = cart.reduce((s, ci) => s + (ci.qty || ci.quantity || 1), 0);
-  document.querySelectorAll('[data-cart-count]').forEach(el => el.textContent = cq);
-  document.querySelectorAll('[data-wish-count]').forEach(el => el.textContent = wish.length);
+  try {
+    // fast path: logged out + nothing saved locally = badges are 0, no requests needed
+    if (!API.user() && !localCart().length && !localWish().length) {
+      document.querySelectorAll('[data-cart-count]').forEach(el => el.textContent = 0);
+      document.querySelectorAll('[data-wish-count]').forEach(el => el.textContent = 0);
+      return;
+    }
+    const [cart, wish] = await Promise.all([getCart().catch(() => []), getWishlist().catch(() => [])]);
+    const cq = cart.reduce((s, ci) => s + (ci.qty || ci.quantity || 1), 0);
+    document.querySelectorAll('[data-cart-count]').forEach(el => el.textContent = cq);
+    document.querySelectorAll('[data-wish-count]').forEach(el => el.textContent = wish.length);
+  } catch {}
 }
 
 function toast(msg) {
