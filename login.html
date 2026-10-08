@@ -15,20 +15,38 @@
 <header id="siteHeader" class="bg-white shadow-sm sticky top-0 z-50"></header>
 <section class="max-w-md mx-auto px-4 py-8 sm:py-12">
   <div class="bg-white rounded-2xl shadow-lg p-5 sm:p-6">
-    <h1 class="text-xl sm:text-2xl font-semibold text-pink-500 mb-1" id="title">Welcome back 🌸</h1>
+    <div class="flex items-center justify-between mb-1">
+      <h1 class="text-xl sm:text-2xl font-semibold text-pink-500" id="title">Welcome back 🌸</h1>
+      <span id="srvStatus" class="text-[11px] px-2 py-1 rounded-full bg-gray-100 text-gray-500">checking…</span>
+    </div>
     <p class="text-sm text-gray-400 mb-4">Login for cart, wishlist, orders & address book.</p>
+
+    <div id="srvHelp" class="hidden text-xs bg-red-50 border border-red-200 text-red-600 rounded-xl p-3 mb-3">
+      <b>Can't reach the server.</b> Login needs the backend running on this computer.<br><br>
+      1. Open PowerShell<br>
+      2. Run: <code class="bg-white px-1 rounded">cd "C:\Users\DEV\OneDrive\Desktop\florvvia-website\backend"</code><br>
+      3. Run: <code class="bg-white px-1 rounded">mvn spring-boot:run</code><br>
+      4. Open: <code class="bg-white px-1 rounded">http://localhost:8080/login.html</code> (don't double-click the file)
+    </div>
+
     <div id="regNameBox" class="hidden"><input id="fName" placeholder="Full name" class="w-full border rounded-full px-4 py-2 text-sm mb-2"><input id="fPhone" placeholder="Phone (optional)" class="w-full border rounded-full px-4 py-2 text-sm mb-2"></div>
-    <input id="fEmail" placeholder="Email" class="w-full border rounded-full px-4 py-2 text-sm mb-2">
-    <input id="fPass" type="password" placeholder="Password" class="w-full border rounded-full px-4 py-2 text-sm mb-3">
+    <input id="fEmail" placeholder="Email" autocomplete="email" class="w-full border rounded-full px-4 py-2 text-sm mb-2">
+    <input id="fPass" type="password" placeholder="Password" autocomplete="current-password" class="w-full border rounded-full px-4 py-2 text-sm mb-3">
     <button onclick="submit()" id="btn" class="btn-pink w-full">Login</button>
     <button onclick="toggle()" id="tog" class="w-full text-sm text-pink-500 mt-3">New here? Create account</button>
     <p id="err" class="text-xs text-red-500 mt-2"></p>
-    <div class="text-xs text-gray-400 mt-4 bg-pink-50 rounded-lg p-3">Admin demo: <b>admin@florvvia.in / admin123</b><br>Admins get product/order/customer management.</div>
+    <div class="text-xs text-gray-400 mt-4 bg-pink-50 rounded-lg p-3">
+      Admin demo: <b>admin@florvvia.in / admin123</b><br>
+      <button onclick="fillAdmin()" class="mt-2 text-pink-500 font-medium">Fill admin login →</button><br>
+      <span class="text-gray-400">Admins get product/order/customer management.</span>
+    </div>
   </div>
 </section>
 <script src="js/common.js"></script>
 <script>
 let MODE = 'login';
+let SERVER_UP = false;
+
 function toggle() {
   MODE = MODE === 'login' ? 'register' : 'login';
   document.getElementById('regNameBox').classList.toggle('hidden', MODE === 'login');
@@ -36,9 +54,31 @@ function toggle() {
   document.getElementById('btn').textContent = MODE === 'login' ? 'Login' : 'Create account';
   document.getElementById('tog').textContent = MODE === 'login' ? 'New here? Create account' : 'Have an account? Login';
 }
+
+function fillAdmin() {
+  document.getElementById('fEmail').value = 'admin@florvvia.in';
+  document.getElementById('fPass').value = 'admin123';
+  document.getElementById('err').textContent = '';
+}
+
+function friendlyError(e) {
+  const m = (e && e.message) || '';
+  if (location.protocol === 'file:')
+    return 'This page was opened as a file. Open http://localhost:8080/login.html instead (backend must be running).';
+  if (/failed to fetch|networkerror|load failed/i.test(m))
+    return "Can't reach the server. Start the backend first (see red box above).";
+  return m || 'Login failed. Try again.';
+}
+
 async function submit() {
   const email = document.getElementById('fEmail').value.trim();
   const password = document.getElementById('fPass').value;
+  const err = document.getElementById('err');
+  err.textContent = '';
+  if (!email || !password) { err.textContent = 'Enter your email and password.'; return; }
+  if (!SERVER_UP) { err.textContent = friendlyError(new Error('Failed to fetch')); return; }
+  const btn = document.getElementById('btn');
+  btn.disabled = true; btn.textContent = 'Please wait…';
   try {
     let r;
     if (MODE === 'login') r = await API.post('/api/auth/login', { email, password });
@@ -52,9 +92,43 @@ async function submit() {
     localStorage.setItem('florvvia_user', JSON.stringify(r.user));
     toast('Welcome, ' + r.user.name + ' 🌸');
     location.href = r.user.role === 'ADMIN' ? 'admin.html' : 'index.html';
-  } catch (e) { document.getElementById('err').textContent = e.message; }
+  } catch (e) { err.textContent = friendlyError(e); }
+  btn.disabled = false; btn.textContent = MODE === 'login' ? 'Login' : 'Create account';
 }
-document.addEventListener('DOMContentLoaded', async () => { await loadConfig(); if (API.user()) location.href = 'account.html'; });
+
+async function checkServer() {
+  const pill = document.getElementById('srvStatus');
+  const help = document.getElementById('srvHelp');
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 6000);
+    const res = await fetch('/api/config', { signal: ctrl.signal });
+    clearTimeout(t);
+    if (!res.ok) throw new Error('down');
+    SERVER_UP = true;
+    pill.textContent = '● server online';
+    pill.className = 'text-[11px] px-2 py-1 rounded-full bg-green-100 text-green-700';
+    help.classList.add('hidden');
+  } catch {
+    SERVER_UP = false;
+    pill.textContent = '● server offline';
+    pill.className = 'text-[11px] px-2 py-1 rounded-full bg-red-100 text-red-600';
+    help.classList.remove('hidden');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (location.protocol === 'file:') {
+    SERVER_UP = false;
+    document.getElementById('srvStatus').textContent = '● opened as file';
+    document.getElementById('srvStatus').className = 'text-[11px] px-2 py-1 rounded-full bg-red-100 text-red-600';
+    document.getElementById('srvHelp').classList.remove('hidden');
+    return;
+  }
+  await loadConfig();
+  await checkServer();
+  if (API.user()) location.href = 'account.html';
+});
 </script>
 </body>
 </html>
