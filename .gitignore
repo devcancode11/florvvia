@@ -1,0 +1,24 @@
+# Java build output (rebuild with: mvn -DskipTests package)
+backend/target/
+*.class
+*.jar
+*.war
+*.original
+
+# H2 file database (local runtime data, recreated on first run)
+backend/data/
+
+# Runtime product-photo uploads (uploaded via admin panel)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Logs
+*.log
+
+# OS / editor junk
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+.vscode/
+.idea/

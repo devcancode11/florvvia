@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Florvvia | Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!-- ADMIN-ONLY HEADER: no cart, no wishlist, no shop nav. Those stay for customers only. -->
+<header class="bg-white shadow-sm sticky top-0 z-50">
+  <div class="flex items-center justify-between px-4 sm:px-6 py-3">
+    <div class="flex items-center gap-2">
+      <span class="text-2xl font-semibold text-pink-500">florvvia</span>
+      <span class="text-[11px] bg-pink-500 text-white px-2 py-0.5 rounded-full font-semibold">ADMIN</span>
+    </div>
+    <div class="flex items-center gap-3 text-sm">
+      <span id="adminName" class="text-gray-500 hidden sm:inline"></span>
+      <a href="index.html" class="text-pink-500 font-medium">View Store →</a>
+      <button onclick="logout()" class="text-gray-500 hover:text-pink-500">Logout</button>
+    </div>
+  </div>
+</header>
+
+<section class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+  <h1 class="text-2xl font-semibold text-pink-500">Dashboard 🔐</h1>
+  <p class="text-xs text-gray-400 mb-4">Real orders, customers & items. Only admins can see this page.</p>
+  <div id="stats" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6"></div>
+
+  <div class="flex gap-2 mb-4 flex-wrap">
+    <button onclick="show('products')" data-t="products" class="tabBtn btn-pink !py-2 text-sm">Products</button>
+    <button onclick="show('orders')" data-t="orders" class="tabBtn btn-outline !py-2 text-sm">Orders <span id="ordBadge" class="hidden bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">0</span></button>
+    <button onclick="show('customers')" data-t="customers" class="tabBtn btn-outline !py-2 text-sm">Customers</button>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div id="products">
+    <div class="bg-white rounded-xl shadow p-4 mb-4">
+      <h3 class="font-medium text-sm mb-2">➕ Add item / ✏️ Edit item</h3>
+      <input type="hidden" id="pId">
+      <div class="grid md:grid-cols-3 gap-2 text-sm">
+        <input id="pName" placeholder="Name *" class="border rounded-lg px-3 py-2 md:col-span-2">
+        <select id="pCat" class="border rounded-lg px-3 py-2">
+          <option value="flowers">Flowers</option>
+          <option value="bouquets">Bouquets</option>
+          <option value="keychains">Keychains & Clips</option>
+        </select>
+        <input id="pPrice" type="number" min="0" placeholder="Price ₹ *" class="border rounded-lg px-3 py-2">
+        <input id="pMrp" type="number" min="0" placeholder="MRP ₹ (optional)" class="border rounded-lg px-3 py-2">
+        <select id="pTag" class="border rounded-lg px-3 py-2">
+          <option value="">No tag</option>
+          <option value="New">New</option>
+          <option value="Bestseller">Bestseller</option>
+        </select>
+        <input id="pCode" placeholder="Code (FL-XXX-01)" class="border rounded-lg px-3 py-2">
+        <input id="pStock" type="number" min="0" placeholder="Stock" value="100" class="border rounded-lg px-3 py-2">
+        <label class="flex items-center gap-2 text-sm text-gray-600"><input type="checkbox" id="pActive" checked class="w-4 h-4"> Visible in shop</label>
+        <input id="pImg" placeholder="Photo URL or /uploads/… or images/…" class="border rounded-lg px-3 py-2 md:col-span-2">
+        <div class="flex gap-2 items-center">
+          <input type="file" id="pFile" accept="image/*" class="text-xs">
+          <button onclick="uploadImg()" class="btn-outline !py-1 text-xs whitespace-nowrap">Upload photo</button>
+        </div>
+        <img id="pPreview" class="hidden w-full h-32 object-cover rounded-lg border md:col-span-1" alt="preview">
+        <textarea id="pDesc" placeholder="About this item (description)…" class="border rounded-lg px-3 py-2 md:col-span-3" rows="3"></textarea>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button onclick="saveProduct()" class="btn-pink !py-2 text-sm flex-1">Save item</button>
+        <button onclick="clearP()" class="btn-outline !py-2 text-sm">Clear</button>
+      </div>
+      <p class="text-xs text-gray-400 mt-1">New items appear in the shop immediately under their category.</p>
+    </div>
+
+    <div class="flex gap-2 mb-3 flex-wrap">
+      <select id="pFilterCat" onchange="renderProducts()" class="border rounded-full px-4 py-2 text-sm">
+        <option value="all">All: Flowers, Bouquets, Keychains & Clips</option>
+        <option value="flowers">Flowers</option>
+        <option value="bouquets">Bouquets</option>
+        <option value="keychains">Keychains & Clips</option>
+      </select>
+      <input id="pSearch" placeholder="Search items…" class="flex-1 min-w-[160px] border rounded-full px-4 py-2 text-sm" oninput="renderProducts()">
+    </div>
+    <div id="pList" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+  </div>
+
+  <!-- ORDERS: real customer + order data -->
+  <div id="orders" class="hidden space-y-3"></div>
+
+  <!-- CUSTOMERS: real customer data (name, email, phone, addresses) -->
+  <div id="customers" class="hidden space-y-4"></div>
+</section>
+
+<script src="js/common.js"></script>
+<script>
+let PRODS = [];
+let seenMaxOrderId = 0, unseenOrders = 0, currentTab = 'products';
+
+function show(t) {
+  currentTab = t;
+  ['products', 'orders', 'customers'].forEach(x => document.getElementById(x).classList.toggle('hidden', x !== t));
+  document.querySelectorAll('.tabBtn').forEach(b => b.className = 'tabBtn !py-2 text-sm ' + (b.dataset.t === t ? 'btn-pink' : 'btn-outline'));
+  if (t === 'orders') { unseenOrders = 0; paintBadge(); loadOrders(); }
+  if (t === 'customers') loadCustomers();
+}
+
+function paintBadge() {
+  const b = document.getElementById('ordBadge');
+  if (!b) return;
+  b.textContent = unseenOrders > 9 ? '9+' : unseenOrders;
+  b.classList.toggle('hidden', unseenOrders <= 0);
+}
+
+function paintStats(s) {
+  document.getElementById('stats').innerHTML = [['Items', s.products], ['Customers', s.users], ['Orders', s.orders], ['Revenue', money(s.revenue)]]
+    .map(([k, v]) => `<div class="bg-white rounded-xl shadow p-4 text-center"><p class="text-xs text-gray-400">${k}</p><p class="text-xl font-semibold text-pink-600">${v}</p></div>`).join('');
+}
+
+async function init() {
+  await loadConfig();
+  const u = API.user();
+  if (!u) { location.href = 'login.html'; return; }
+  if (u.role !== 'ADMIN') { toast('Admin only'); location.href = 'index.html'; return; }
+  document.getElementById('adminName').textContent = u.name + ' • ' + u.email;
+  try {
+    paintStats(await API.get('/api/admin/stats'));
+  } catch (e) { toast(e.message); }
+  document.getElementById('pImg').addEventListener('input', previewImg);
+  PRODS = await API.get('/api/products').catch(() => []);
+  renderProducts();
+  // 🔔 order notifications: remember latest order, then poll for new ones
+  try {
+    seenMaxOrderId = Math.max(+(localStorage.getItem('florvvia_admin_seen') || 0), await fetchMaxOrderId());
+    localStorage.setItem('florvvia_admin_seen', String(seenMaxOrderId));
+  } catch {}
+  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  setInterval(pollNewOrders, 30000); // check every 30s while dashboard is open
+}
+
+async function fetchMaxOrderId() {
+  const list = await API.get('/api/admin/orders');
+  return list.reduce((m, o) => Math.max(m, o.id), 0);
+}
+
+async function pollNewOrders() {
+  try {
+    paintStats(await API.get('/api/admin/stats'));
+    const list = await API.get('/api/admin/orders');
+    const maxId = list.reduce((m, o) => Math.max(m, o.id), 0);
+    if (maxId > seenMaxOrderId) {
+      const fresh = list.filter(o => o.id > seenMaxOrderId);
+      unseenOrders += fresh.length;
+      paintBadge();
+      const names = fresh.map(o => `${o.orderNo} (${money(o.total)})`).join(', ');
+      toast(`🔔 New order placed! ${names}`);
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try { new Notification('Florvvia — new order 🔔', { body: `${names} — open admin Orders to view.` }); } catch {}
+      }
+      seenMaxOrderId = maxId;
+      localStorage.setItem('florvvia_admin_seen', String(seenMaxOrderId));
+      if (currentTab === 'orders') { unseenOrders = 0; paintBadge(); loadOrders(); }
+    } else {
+      seenMaxOrderId = Math.max(seenMaxOrderId, maxId);
+    }
+  } catch {}
+}
+
+function previewImg() {
+  const v = document.getElementById('pImg').value.split(',')[0].trim();
+  const img = document.getElementById('pPreview');
+  if (v) { img.src = v; img.classList.remove('hidden'); } else img.classList.add('hidden');
+}
+
+/* ---------- products: add + edit photo/about/price/etc ---------- */
+function renderProducts() {
+  const c = document.getElementById('pFilterCat').value;
+  const s = (document.getElementById('pSearch').value || '').toLowerCase();
+  const list = PRODS.filter(p =>
+    (c === 'all' || (p.category || '').toLowerCase() === c) &&
+    (!s || (p.name + ' ' + (p.code || '') + ' ' + (p.description || '')).toLowerCase().includes(s)));
+  document.getElementById('pList').innerHTML = list.map(p => `
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden text-sm">
+      <div class="relative">
+        <img src="${(p.images || [])[0] || ''}" class="w-full h-32 object-cover" onerror="this.src='images/flowers/flower1.jpg'">
+        ${p.tag ? `<span class="product-tag">${p.tag}</span>` : ''}
+      </div>
+      <div class="p-2">
+        <b class="text-xs">${p.name}</b><br>
+        <span class="text-pink-600 font-semibold">${money(p.price)}</span>
+        <span class="text-gray-400 text-xs capitalize"> • ${catLabel(p.category)}${p.active === false ? ' • HIDDEN' : ''}</span>
+        <p class="text-xs text-gray-400 truncate">${p.description || ''}</p>
+        <div class="flex gap-1 mt-1">
+          <button onclick="editP(${p.id})" class="flex-1 text-xs bg-pink-50 text-pink-600 px-2 py-1 rounded font-medium">Edit</button>
+          <button onclick="delP(${p.id})" class="flex-1 text-xs bg-red-50 text-red-500 px-2 py-1 rounded">Hide</button>
+        </div>
+      </div>
+    </div>`).join('') || '<p class="text-sm text-gray-400">No items in this category yet — add one above ☝️</p>';
+}
+
+function editP(id) {
+  const p = PRODS.find(x => x.id === id); if (!p) return;
+  const g = (i) => document.getElementById(i);
+  g('pId').value = p.id;
+  g('pName').value = p.name || '';
+  g('pCat').value = (p.category || 'flowers').toLowerCase();
+  g('pPrice').value = p.price || '';
+  g('pMrp').value = p.mrp || '';
+  g('pTag').value = p.tag || '';
+  g('pCode').value = p.code || '';
+  g('pStock').value = p.stock ?? 100;
+  g('pActive').checked = p.active !== false;
+  g('pImg').value = (p.images || []).join(', ');
+  g('pDesc').value = p.description || '';
+  previewImg();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('Editing: ' + p.name);
+}
+
+function clearP() {
+  ['pId', 'pName', 'pPrice', 'pMrp', 'pTag', 'pCode', 'pImg', 'pDesc'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('pStock').value = 100;
+  document.getElementById('pCat').value = 'flowers';
+  document.getElementById('pActive').checked = true;
+  document.getElementById('pPreview').classList.add('hidden');
+}
+
+async function uploadImg() {
+  const f = document.getElementById('pFile').files[0];
+  if (!f) { toast('Choose a photo first'); return; }
+  const fd = new FormData(); fd.append('file', f);
+  try {
+    const res = await fetch('/api/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + API.token() }, body: fd });
+    const j = await res.json();
+    if (!res.ok) throw new Error(j.error || 'Upload failed');
+    const cur = document.getElementById('pImg').value.trim();
+    document.getElementById('pImg').value = cur ? cur + ', ' + j.url : j.url;
+    previewImg();
+    toast('Photo uploaded ✅');
+  } catch (e) { toast(e.message); }
+}
+
+async function saveProduct() {
+  const g = (i) => document.getElementById(i).value;
+  const imgs = g('pImg').split(',').map(s => s.trim()).filter(Boolean);
+  const cat = (document.getElementById('pCat').value || 'flowers').toLowerCase();
+  if (!['flowers', 'bouquets', 'keychains'].includes(cat)) { toast('Category must be Flowers, Bouquets or Keychains'); return; }
+  const body = {
+    name: g('pName').trim(), category: cat,
+    price: +g('pPrice') || 0, mrp: g('pMrp') ? +g('pMrp') : null,
+    tag: g('pTag') || null, code: g('pCode') || null,
+    stock: g('pStock') === '' ? 100 : (+g('pStock') || 0),
+    images: imgs, description: g('pDesc'),
+    active: document.getElementById('pActive').checked
+  };
+  if (!body.name || !body.price) { toast('Name + price required'); return; }
+  try {
+    const id = document.getElementById('pId').value;
+    if (id) await API.put('/api/products/' + id, body);
+    else await API.post('/api/products', body);
+    toast('Saved ✅'); clearP();
+    PRODS = await API.get('/api/products'); renderProducts();
+  } catch (e) { toast(e.message); }
+}
+
+async function delP(id) {
+  if (!confirm('Hide this item from the shop? (Old orders keep it.)')) return;
+  try { await API.del('/api/products/' + id); toast('Hidden'); PRODS = await API.get('/api/products'); renderProducts(); }
+  catch (e) { toast(e.message); }
+}
+
+/* ---------- orders: real data ---------- */
+async function loadOrders() {
+  const box = document.getElementById('orders');
+  try {
+    const list = await API.get('/api/admin/orders');
+    box.innerHTML = list.map(o => `
+      <div class="bg-white rounded-xl shadow-sm p-4 text-sm">
+        <div class="flex justify-between flex-wrap gap-2">
+          <b>${o.orderNo}</b>
+          <span class="text-xs text-gray-400">${new Date(o.createdAt).toLocaleString()}</span>
+        </div>
+        <div class="text-xs bg-pink-50 rounded-lg p-2 mt-2">
+          👤 <b>${o.customerName || '-'}</b> • 📞 ${o.customerPhone || '-'} • ✉️ ${o.customerEmail || '-'}<br>
+          📍 ${o.addressText || '-'}
+        </div>
+        <p class="mt-2">${o.items.map(i => `${i.productName} ×${i.qty}`).join(', ')} — <b class="text-pink-600">${money(o.total)}</b> <span class="text-xs text-gray-400">(${o.paymentMode} / ${o.paymentStatus})</span></p>
+        <div class="flex gap-2 mt-2 flex-wrap items-center">
+          <label class="text-xs text-gray-500">Status:</label>
+          <select onchange="setStatus(${o.id},this.value)" class="border rounded-full px-2 py-1 text-xs">
+            ${['PLACED', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'].map(s => `<option ${o.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+          </select>
+          <label class="text-xs text-gray-500">Payment:</label>
+          <select onchange="setPay(${o.id},this.value)" class="border rounded-full px-2 py-1 text-xs">
+            ${['PENDING', 'PAID', 'FAILED'].map(s => `<option ${o.paymentStatus === s ? 'selected' : ''}>${s}</option>`).join('')}
+          </select>
+          <a target="_blank" href="${o.whatsappLink || '#'}" class="text-xs text-green-600 font-medium">WhatsApp →</a>
+        </div>
+      </div>`).join('') || '<p class="text-sm text-gray-400">No orders yet — new customer orders appear here with name, phone, email & address.</p>';
+  } catch (e) { box.innerHTML = '<p class="text-sm text-red-400">' + e.message + '</p>'; }
+}
+async function setStatus(id, status) { try { await API.post(`/api/admin/orders/${id}/status`, { status }); toast('Order updated'); } catch (e) { toast(e.message); } }
+async function setPay(id, paymentStatus) { try { await API.post(`/api/admin/orders/${id}/status`, { paymentStatus }); toast('Payment updated'); } catch (e) { toast(e.message); } }
+
+/* ---------- customers: real data ---------- */
+async function loadCustomers() {
+  const box = document.getElementById('customers');
+  try {
+    const [list, addrs] = await Promise.all([
+      API.get('/api/admin/users'),
+      API.get('/api/admin/addresses').catch(() => [])
+    ]);
+    const byUser = {};
+    (addrs || []).forEach(a => {
+      const k = a.userEmail || a.userId || a.fullName;
+      (byUser[k] = byUser[k] || []).push(a);
+    });
+    box.innerHTML =
+      `<div class="bg-white rounded-xl shadow overflow-auto">
+        <h3 class="font-medium text-sm p-3 pb-0">Customers (${list.length}) — name, email, phone</h3>
+        <table class="w-full text-sm">
+          <tr class="text-left text-gray-400 text-xs"><th class="p-3">Name</th><th class="p-3">Email</th><th class="p-3">Phone</th><th class="p-3">Role</th></tr>
+          ${list.map(u => `<tr class="border-t"><td class="p-3 font-medium">${u.name}</td><td class="p-3">${u.email}</td><td class="p-3">${u.phone || '-'}</td><td class="p-3">${u.role}</td></tr>`).join('')}
+        </table>
+      </div>
+      <div class="bg-white rounded-xl shadow p-3">
+        <h3 class="font-medium text-sm mb-2">Saved delivery addresses (${(addrs || []).length})</h3>
+        ${(addrs || []).length ? addrs.map(a => `
+          <div class="text-sm border rounded-lg p-2 mb-2">
+            <b>${a.fullName}</b> • 📞 ${a.phone || '-'} • ✉️ ${a.userEmail || '-'} ${a.isDefault ? '• <span class="text-pink-500 font-medium">Default</span>' : ''}<br>
+            <span class="text-gray-500">📍 ${[a.line1, a.line2, a.city, a.pincode, a.state].filter(Boolean).join(', ')}</span>
+          </div>`).join('') : '<p class="text-sm text-gray-400">No saved addresses yet — they appear here when customers order or save one.</p>'}
+      </div>`;
+  } catch (e) { box.innerHTML = '<p class="text-sm text-red-400">' + e.message + '</p>'; }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

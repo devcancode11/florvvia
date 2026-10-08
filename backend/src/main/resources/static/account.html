@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Florvvia | My Account</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>window.HEADER_ACTIVE='home';</script>
+</head>
+<body>
+<header id="siteHeader" class="bg-white shadow-sm sticky top-0 z-50"></header>
+<section class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+  <h1 class="text-2xl font-semibold text-pink-500 mb-1">My Account</h1>
+  <p id="who" class="text-sm text-gray-400 mb-4"></p>
+  <div class="flex gap-2 mb-4 flex-wrap">
+    <button onclick="show('orders')" class="tabBtn btn-pink !py-2 text-sm" data-t="orders">Orders</button>
+    <button onclick="show('wishlist')" class="tabBtn btn-outline !py-2 text-sm" data-t="wishlist">Wishlist ♡</button>
+    <button onclick="show('address')" class="tabBtn btn-outline !py-2 text-sm" data-t="address">Address Book 📍</button>
+  </div>
+  <div id="orders" class="space-y-3"></div>
+  <div id="wishlist" class="hidden grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+  <div id="address" class="hidden">
+    <div id="addrList" class="grid md:grid-cols-2 gap-3 mb-4"></div>
+    <div class="bg-white rounded-xl shadow p-4">
+      <h3 class="font-medium text-sm mb-2">Add / edit address</h3>
+      <input type="hidden" id="eId">
+      <div class="grid grid-cols-2 gap-2 text-sm">
+        <input id="eLabel" placeholder="Label (Home/Work)" class="border rounded-lg px-3 py-2">
+        <input id="eName" placeholder="Full name *" class="border rounded-lg px-3 py-2">
+        <input id="ePhone" placeholder="Phone" class="border rounded-lg px-3 py-2 col-span-2">
+        <input id="eLine1" placeholder="Address line 1 *" class="border rounded-lg px-3 py-2 col-span-2">
+        <input id="eCity" placeholder="City" class="border rounded-lg px-3 py-2">
+        <input id="ePin" placeholder="Pincode" class="border rounded-lg px-3 py-2">
+        <input id="eState" placeholder="State" class="border rounded-lg px-3 py-2 col-span-2">
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button onclick="saveAddr()" class="btn-pink !py-2 text-sm flex-1">Save Address</button>
+        <button onclick="clearForm()" class="btn-outline !py-2 text-sm">Clear</button>
+      </div>
+    </div>
+  </div>
+</section>
+<script src="js/common.js"></script>
+<script>
+function show(t) {
+  ['orders', 'wishlist', 'address'].forEach(x => document.getElementById(x).classList.toggle('hidden', x !== t));
+  document.querySelectorAll('.tabBtn').forEach(b => {
+    const on = b.dataset.t === t;
+    b.className = 'tabBtn !py-2 text-sm ' + (on ? 'btn-pink' : 'btn-outline');
+  });
+  if (t === 'orders') loadOrders();
+  if (t === 'wishlist') loadWish();
+  if (t === 'address') loadAddr();
+}
+async function init() {
+  await loadConfig();
+  const u = API.user();
+  if (!u) { location.href = 'login.html'; return; }
+  document.getElementById('who').textContent = `${u.name} • ${u.email}`;
+  const tab = new URLSearchParams(location.search).get('tab') || 'orders';
+  show(tab);
+}
+async function loadOrders() {
+  const box = document.getElementById('orders');
+  try {
+    const list = await API.get('/api/orders/mine');
+    box.innerHTML = list.length ? list.map(o => `
+      <div class="bg-white rounded-xl shadow-sm p-4 text-sm">
+        <div class="flex justify-between flex-wrap gap-2"><b>${o.orderNo}</b><span class="px-2 py-0.5 rounded-full text-xs ${o.status === 'CANCELLED' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}">${o.status}</span></div>
+        <p class="text-gray-500 text-xs">${new Date(o.createdAt).toLocaleString()} • ${o.paymentMode} • ${o.paymentStatus}</p>
+        <p class="mt-1">${o.items.map(i => `${i.productName} ×${i.qty}`).join(', ')}</p>
+        <div class="flex justify-between mt-1"><span class="text-gray-500">${o.addressText || ''}</span><b class="text-pink-600">${money(o.total)}</b></div>
+        <div class="flex gap-3 mt-2">
+          <a target="_blank" href="${INSTA_URL}" class="text-xs text-pink-500 font-medium">Confirm on Instagram →</a>
+          <a target="_blank" href="${o.whatsappLink || '#'}" class="text-xs text-green-600 font-medium">Notify us on WhatsApp →</a>
+        </div>
+      </div>`).join('') : '<p class="text-gray-400 text-sm">No orders yet. <a href="index.html" class="text-pink-500">Shop →</a></p>';
+  } catch (e) { box.innerHTML = '<p class="text-sm text-red-400">' + e.message + '</p>'; }
+}
+async function loadWish() {
+  const box = document.getElementById('wishlist');
+  const list = await getWishlist();
+  box.innerHTML = list.length ? list.map(w => {
+    const p = w.product;
+    return `<div class="bg-white rounded-xl shadow-sm overflow-hidden"><a href="product.html?id=${p.id}"><img src="${(p.images || [])[0] || ''}" class="category-img !h-40" onerror="this.src='images/flowers/flower1.jpg'"></a><div class="p-2 text-center"><p class="text-xs font-medium truncate">${p.name}</p><p class="text-pink-600 text-sm font-semibold">${money(p.price)}</p><button onclick="toggleWishlist(${p.id}).then(loadWish)" class="text-xs text-red-400">Remove</button></div></div>`;
+  }).join('') : '<p class="text-gray-400 text-sm col-span-full">Wishlist empty ♡</p>';
+}
+async function loadAddr() {
+  try {
+    const list = await API.get('/api/addresses');
+    document.getElementById('addrList').innerHTML = list.length ? list.map(a => `
+      <div class="bg-white rounded-xl shadow-sm p-3 text-sm ${a.default ? 'border-2 border-pink-300' : ''}">
+        <b>${a.label || 'Home'}</b> ${a.default ? '• <span class="text-pink-500">Default location</span>' : ''}<br>
+        ${a.fullName} • ${a.phone || ''}<br><span class="text-gray-500">${a.line1}, ${a.city || ''} ${a.pincode || ''}, ${a.state || ''}</span>
+        <div class="flex gap-2 mt-2 text-xs">
+          <button onclick='editAddr(${JSON.stringify(a.id)})' class="text-pink-500">Edit</button>
+          ${a.default ? '' : `<button onclick="setDef(${a.id})" class="text-gray-500">Set default</button>`}
+          <button onclick="delAddr(${a.id})" class="text-red-400">Delete</button>
+        </div>
+      </div>`).join('') : '<p class="text-sm text-gray-400">No addresses — add your first delivery location 📍</p>';
+    window._ADDRS = list;
+  } catch (e) { document.getElementById('addrList').innerHTML = '<p class="text-sm text-red-400">' + e.message + '</p>'; }
+}
+function editAddr(id) {
+  const a = (window._ADDRS || []).find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('eId').value = a.id;
+  document.getElementById('eLabel').value = a.label || '';
+  document.getElementById('eName').value = a.fullName || '';
+  document.getElementById('ePhone').value = a.phone || '';
+  document.getElementById('eLine1').value = a.line1 || '';
+  document.getElementById('eCity').value = a.city || '';
+  document.getElementById('ePin').value = a.pincode || '';
+  document.getElementById('eState').value = a.state || '';
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+function clearForm() { ['eId', 'eLabel', 'eName', 'ePhone', 'eLine1', 'eCity', 'ePin', 'eState'].forEach(i => document.getElementById(i).value = ''); }
+async function saveAddr() {
+  const v = (id) => document.getElementById(id).value;
+  const b = { label: v('eLabel') || 'Home', fullName: v('eName'), phone: v('ePhone'), line1: v('eLine1'), city: v('eCity'), pincode: v('ePin'), state: v('eState') };
+  try {
+    if (v('eId')) await API.put('/api/addresses/' + v('eId'), b);
+    else await API.post('/api/addresses', b);
+    clearForm(); toast('Address saved 📍'); loadAddr();
+  } catch (e) { toast(e.message); }
+}
+async function delAddr(id) { try { await API.del('/api/addresses/' + id); toast('Deleted'); loadAddr(); } catch (e) { toast(e.message); } }
+async function setDef(id) { try { await API.post('/api/addresses/' + id + '/default', {}); toast('Default location set 📍'); loadAddr(); } catch (e) { toast(e.message); } }
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
