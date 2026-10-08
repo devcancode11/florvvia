@@ -29,6 +29,7 @@
     <p class="text-xs text-gray-400">Login required to review. Admin can remove inappropriate reviews.</p>
   </div>
 </section>
+<script src="js/config.js"></script>
 <script src="js/common.js"></script>
 <script>
 let P = null;
@@ -39,12 +40,12 @@ async function init() {
   P = list.find(x => String(x.id) === String(id)) || list[0];
   if (!P) { document.getElementById('wrap').innerHTML = '<p>Product not found. <a href="index.html" class="text-pink-500">Back</a></p>'; return; }
   if (BACKEND_OK) { try { P = await API.get('/api/products/' + P.id); } catch {} }
-  const img0 = (P.images && P.images[0]) || 'images/flowers/flower1.jpg';
+  const img0 = imgUrl((P.images && P.images[0]) || 'images/flowers/flower1.jpg');
   document.getElementById('wrap').innerHTML = `
     <div class="relative">
       ${P.tag ? `<span class="product-tag">${P.tag}</span>` : ''}
       <img id="mainImg" src="${img0}" class="gallery-main shadow" onerror="this.src='images/flowers/flower1.jpg'">
-      <div class="gallery-thumbs">${(P.images || [img0]).map((s, i) => `<img src="${s}" onclick="document.getElementById('mainImg').src='${s}'" class="${i === 0 ? 'active' : ''}" onerror="this.style.display='none'">`).join('')}</div>
+      <div class="gallery-thumbs">${(P.images || [img0]).map((s, i) => `<img src="${imgUrl(s)}" onclick="document.getElementById('mainImg').src=imgUrl('${s}')" class="${i === 0 ? 'active' : ''}" onerror="this.style.display='none'">`).join('')}</div>
     </div>
     <div>
       <p class="text-xs text-gray-400 mb-1">${P.code || ''} • ${catLabel(P.category)}</p>

@@ -22,11 +22,12 @@
     <p class="text-sm text-gray-400 mb-4">Login for cart, wishlist, orders & address book.</p>
 
     <div id="srvHelp" class="hidden text-xs bg-red-50 border border-red-200 text-red-600 rounded-xl p-3 mb-3">
-      <b>Can't reach the server.</b> Login needs the backend running on this computer.<br><br>
-      1. Open PowerShell<br>
+      <b>Can't reach the server.</b><br><br>
+      <span id="srvHelpLocal">1. Open PowerShell<br>
       2. Run: <code class="bg-white px-1 rounded">cd "C:\Users\DEV\OneDrive\Desktop\florvvia-website\backend"</code><br>
       3. Run: <code class="bg-white px-1 rounded">mvn spring-boot:run</code><br>
-      4. Open: <code class="bg-white px-1 rounded">http://localhost:8080/login.html</code> (don't double-click the file)
+      4. Open: <code class="bg-white px-1 rounded">http://localhost:8080/login.html</code> (don't double-click the file)</span>
+      <span id="srvHelpHosted" class="hidden">This shop is hosted online, so set your backend URL in <code class="bg-white px-1 rounded">js/config.js</code> (<code class="bg-white px-1 rounded">FLORVVIA_API_URL</code>) — e.g. your Render URL — then redeploy. Or open this page with <code class="bg-white px-1 rounded">?api=https://your-backend-url</code> to try instantly.</span>
     </div>
 
     <div id="regNameBox" class="hidden"><input id="fName" placeholder="Full name" class="w-full border rounded-full px-4 py-2 text-sm mb-2"><input id="fPhone" placeholder="Phone (optional)" class="w-full border rounded-full px-4 py-2 text-sm mb-2"></div>
@@ -42,6 +43,7 @@
     </div>
   </div>
 </section>
+<script src="js/config.js"></script>
 <script src="js/common.js"></script>
 <script>
 let MODE = 'login';
@@ -99,12 +101,11 @@ async function submit() {
 async function checkServer() {
   const pill = document.getElementById('srvStatus');
   const help = document.getElementById('srvHelp');
+  const hosted = location.hostname !== 'localhost' && location.hostname !== '127.0.0.1' && location.protocol !== 'file:';
+  document.getElementById('srvHelpLocal').classList.toggle('hidden', hosted);
+  document.getElementById('srvHelpHosted').classList.toggle('hidden', !hosted);
   try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 6000);
-    const res = await fetch('/api/config', { signal: ctrl.signal });
-    clearTimeout(t);
-    if (!res.ok) throw new Error('down');
+    await API.get('/api/config');
     SERVER_UP = true;
     pill.textContent = '● server online';
     pill.className = 'text-[11px] px-2 py-1 rounded-full bg-green-100 text-green-700';

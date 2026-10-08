@@ -93,6 +93,7 @@
   <div id="customers" class="hidden space-y-4"></div>
 </section>
 
+<script src="js/config.js"></script>
 <script src="js/common.js"></script>
 <script>
 let PRODS = [];
@@ -170,7 +171,7 @@ async function pollNewOrders() {
 function previewImg() {
   const v = document.getElementById('pImg').value.split(',')[0].trim();
   const img = document.getElementById('pPreview');
-  if (v) { img.src = v; img.classList.remove('hidden'); } else img.classList.add('hidden');
+  if (v) { img.src = imgUrl(v); img.classList.remove('hidden'); } else img.classList.add('hidden');
 }
 
 /* ---------- products: add + edit photo/about/price/etc ---------- */
@@ -183,7 +184,7 @@ function renderProducts() {
   document.getElementById('pList').innerHTML = list.map(p => `
     <div class="bg-white rounded-xl shadow-sm overflow-hidden text-sm">
       <div class="relative">
-        <img src="${(p.images || [])[0] || ''}" class="w-full h-32 object-cover" onerror="this.src='images/flowers/flower1.jpg'">
+        <img src="${imgUrl((p.images || [])[0] || '')}" class="w-full h-32 object-cover" onerror="this.src='images/flowers/flower1.jpg'">
         ${p.tag ? `<span class="product-tag">${p.tag}</span>` : ''}
       </div>
       <div class="p-2">
@@ -231,7 +232,7 @@ async function uploadImg() {
   if (!f) { toast('Choose a photo first'); return; }
   const fd = new FormData(); fd.append('file', f);
   try {
-    const res = await fetch('/api/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + API.token() }, body: fd });
+    const res = await fetch(API.base + '/api/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + API.token() }, body: fd });
     const j = await res.json();
     if (!res.ok) throw new Error(j.error || 'Upload failed');
     const cur = document.getElementById('pImg').value.trim();

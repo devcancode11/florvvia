@@ -78,6 +78,7 @@
 
 <footer class="text-center py-8 text-sm text-gray-400 bg-white">© 2026 Florvvia • Handmade with love 🌸<br>Instagram: <a href="https://www.instagram.com/florvvia/" target="_blank" class="text-pink-500">@florvvia</a> • DM us to order</footer>
 
+<script src="js/config.js"></script>
 <script src="js/common.js"></script>
 <script>
 let ALL = [];
@@ -96,7 +97,7 @@ async function init() {
   render();
 }
 function card(p) {
-  const img = (p.images && p.images[0]) || 'images/flowers/flower1.jpg';
+  const img = imgUrl((p.images && p.images[0]) || 'images/flowers/flower1.jpg');
   return `
   <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover relative">
     ${p.tag ? `<span class="product-tag">${p.tag}</span>` : ''}

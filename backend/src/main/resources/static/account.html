@@ -44,6 +44,7 @@
     </div>
   </div>
 </section>
+<script src="js/config.js"></script>
 <script src="js/common.js"></script>
 <script>
 function show(t) {
@@ -86,7 +87,7 @@ async function loadWish() {
   const list = await getWishlist();
   box.innerHTML = list.length ? list.map(w => {
     const p = w.product;
-    return `<div class="bg-white rounded-xl shadow-sm overflow-hidden"><a href="product.html?id=${p.id}"><img src="${(p.images || [])[0] || ''}" class="category-img !h-40" onerror="this.src='images/flowers/flower1.jpg'"></a><div class="p-2 text-center"><p class="text-xs font-medium truncate">${p.name}</p><p class="text-pink-600 text-sm font-semibold">${money(p.price)}</p><button onclick="toggleWishlist(${p.id}).then(loadWish)" class="text-xs text-red-400">Remove</button></div></div>`;
+    return `<div class="bg-white rounded-xl shadow-sm overflow-hidden"><a href="product.html?id=${p.id}"><img src="${imgUrl((p.images || [])[0] || '')}" class="category-img !h-40" onerror="this.src='images/flowers/flower1.jpg'"></a><div class="p-2 text-center"><p class="text-xs font-medium truncate">${p.name}</p><p class="text-pink-600 text-sm font-semibold">${money(p.price)}</p><button onclick="toggleWishlist(${p.id}).then(loadWish)" class="text-xs text-red-400">Remove</button></div></div>`;
   }).join('') : '<p class="text-gray-400 text-sm col-span-full">Wishlist empty ♡</p>';
 }
 async function loadAddr() {

@@ -1,6 +1,12 @@
 // Florvvia common: API + auth + cart/wishlist (works with backend, falls back to demo mode)
+// Backend URL: same-origin when running locally (localhost),
+// otherwise window.FLORVVIA_API_URL (js/config.js) or ?api= override / saved value.
+try {
+  const apiParam = new URLSearchParams(location.search).get('api');
+  if (apiParam) localStorage.setItem('florvvia_api_url', apiParam);
+} catch {}
 const API = {
-  base: '',
+  base: window.FLORVVIA_API_URL || localStorage.getItem('florvvia_api_url') || '',
   token() { return localStorage.getItem('florvvia_token') || ''; },
   user() { try { return JSON.parse(localStorage.getItem('florvvia_user') || 'null'); } catch { return null; } },
   isAdmin() { const u = this.user(); return u && (u.role === 'ADMIN'); },
@@ -156,6 +162,14 @@ function toast(msg) {
 function money(n) { return '₹' + (Number(n) || 0).toLocaleString('en-IN'); }
 
 const INSTA_URL = 'https://www.instagram.com/florvvia/';
+
+// Uploaded photos live on the backend (/uploads/...) — prefix the API host when frontend is hosted elsewhere.
+function imgUrl(s) {
+  if (!s) return 'images/flowers/flower1.jpg';
+  if (/^https?:/i.test(s)) return s;
+  if (s.startsWith('/') && API.base) return API.base + s;
+  return s;
+}
 
 // Display names for the 3 shop categories (slugs stay flowers/bouquets/keychains in the database)
 function catLabel(c) {

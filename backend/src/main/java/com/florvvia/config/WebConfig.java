@@ -19,4 +19,14 @@ public class WebConfig implements WebMvcConfigurer {
     registry.addResourceHandler("/uploads/**").addResourceLocations(loc)
       .setCacheControl(CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic());
   }
+
+  @Override
+  public void addCorsMappings(CorsRegistry registry) {
+    // Lets the hosted frontend (e.g. Netlify) call this API cross-origin.
+    registry.addMapping("/api/**")
+      .allowedOriginPatterns("*")
+      .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+      .allowedHeaders("*")
+      .maxAge(3600);
+  }
 }

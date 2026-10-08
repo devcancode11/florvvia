@@ -1,0 +1,24 @@
+# Render blueprint: deploys the Florvvia backend (Docker) in one click.
+# In Render: New → Blueprint → connect repo devcancode11/florvvia.
+# After deploy: copy the service URL into js/config.js (FLORVVIA_API_URL) and redeploy Netlify.
+services:
+  - type: web
+    name: florvvia-backend
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /api/config
+    envVars:
+      # --- persistent database (recommended): create a free Postgres in Render,
+      # then set these three from its dashboard (or link the DB to this service) ---
+      # - key: SPRING_DATASOURCE_URL
+      #   value: jdbc:postgresql://HOST:5432/DATABASE
+      # - key: SPRING_DATASOURCE_USERNAME
+      #   value: DB_USER
+      # - key: SPRING_DATASOURCE_PASSWORD
+      #   value: DB_PASSWORD
+      # - key: SPRING_DATASOURCE_DRIVER
+      #   value: org.postgresql.Driver
+      # --- security: random JWT secret (generate one, don't reuse this example) ---
+      - key: APP_JWT_SECRET
+        generateValue: true

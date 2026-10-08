@@ -18,6 +18,7 @@
   <div id="items" class="space-y-3"></div>
   <div id="summary" class="mt-6 bg-white rounded-xl shadow p-4"></div>
 </section>
+<script src="js/config.js"></script>
 <script src="js/common.js"></script>
 <script>
 async function init() {
@@ -32,7 +33,7 @@ async function init() {
   box.innerHTML = cart.map(ci => {
     const p = ci.product || ci;
     const qty = ci.qty || 1;
-    const img = (p.images && p.images[0]) || p.image || 'images/flowers/flower1.jpg';
+    const img = imgUrl((p.images && p.images[0]) || p.image || 'images/flowers/flower1.jpg');
     return `<div class="bg-white rounded-xl shadow-sm p-2.5 sm:p-3 flex gap-2.5 sm:gap-3 items-center">
       <img src="${img}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover flex-shrink-0" onerror="this.src='images/flowers/flower1.jpg'">
       <div class="flex-1 min-w-0">
