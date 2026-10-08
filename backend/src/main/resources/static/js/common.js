@@ -155,26 +155,26 @@ function logout() {
 function headerHTML(active = 'home') {
   const u = API.user();
   return `
-  <div class="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-pink-100">
-    <a href="index.html" class="text-2xl font-semibold text-pink-500">florvvia</a>
+  <div class="flex items-center justify-between px-3 sm:px-6 py-2 sm:py-3 border-b border-pink-100">
+    <a href="index.html" class="text-xl sm:text-2xl font-semibold text-pink-500">florvvia</a>
     <div class="hidden md:flex flex-1 max-w-md mx-6 gap-2">
       <input id="globalSearch" placeholder="Search flowers, bouquets, keychains & clips…" class="flex-1 border border-pink-200 rounded-full px-4 py-2 text-sm" />
       <button onclick="submitHeaderSearch('globalSearch')" aria-label="Search" class="bg-pink-500 text-white rounded-full w-9 h-9 flex-shrink-0 hover:bg-pink-600">🔍</button>
     </div>
-    <div class="flex items-center gap-4">
-      <a href="account.html?tab=wishlist" class="relative text-gray-600 hover:text-pink-500" aria-label="Wishlist">♡<span data-wish-count class="absolute -top-2 -right-2 bg-pink-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span></a>
-      ${u ? `<a href="account.html" class="text-sm font-medium text-gray-700 hover:text-pink-500 max-w-[90px] truncate">${u.name.split(' ')[0]}</a>
-             <button onclick="logout()" class="text-xs text-gray-500 hover:text-pink-500">Logout</button>`
-          : `<a href="login.html" class="text-gray-600 hover:text-pink-500" aria-label="Account">👤</a>`}
-      ${u && u.role === 'ADMIN' ? `<a href="admin.html" class="text-xs bg-pink-500 text-white px-3 py-1 rounded-full">Admin</a>` : ''}
-      <a href="cart.html" class="relative text-gray-600 hover:text-pink-500" aria-label="Cart">🛒<span data-cart-count class="absolute -top-2 -right-2 bg-pink-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span></a>
+    <div class="flex items-center gap-3 sm:gap-4">
+      <a href="account.html?tab=wishlist" class="relative text-lg sm:text-xl text-gray-600 hover:text-pink-500" aria-label="Wishlist">♡<span data-wish-count class="absolute -top-2 -right-2 bg-pink-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span></a>
+      ${u ? `<a href="account.html" class="text-xs sm:text-sm font-medium text-gray-700 hover:text-pink-500 max-w-[70px] sm:max-w-[90px] truncate">${u.name.split(' ')[0]}</a>
+             <button onclick="logout()" class="text-[11px] sm:text-xs text-gray-500 hover:text-pink-500">Logout</button>`
+          : `<a href="login.html" class="text-lg sm:text-xl text-gray-600 hover:text-pink-500" aria-label="Account">👤</a>`}
+      ${u && u.role === 'ADMIN' ? `<a href="admin.html" class="text-[11px] sm:text-xs bg-pink-500 text-white px-2.5 sm:px-3 py-1 rounded-full">Admin</a>` : ''}
+      <a href="cart.html" class="relative text-lg sm:text-xl text-gray-600 hover:text-pink-500" aria-label="Cart">🛒<span data-cart-count class="absolute -top-2 -right-2 bg-pink-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span></a>
     </div>
   </div>
-  <div class="md:hidden px-4 py-2 flex gap-2">
-    <input id="globalSearchM" placeholder="Search flowers, bouquets…" class="flex-1 border border-pink-200 rounded-full px-4 py-2 text-sm" />
-    <button onclick="submitHeaderSearch('globalSearchM')" class="bg-pink-500 text-white text-sm font-medium rounded-full px-4 hover:bg-pink-600">Go</button>
+  <div class="md:hidden px-3 py-2 flex gap-2">
+    <input id="globalSearchM" placeholder="Search flowers, bouquets…" class="flex-1 min-w-0 border border-pink-200 rounded-full px-4 py-2 text-sm" />
+    <button onclick="submitHeaderSearch('globalSearchM')" class="bg-pink-500 text-white text-sm font-medium rounded-full px-4 hover:bg-pink-600 flex-shrink-0">Go</button>
   </div>
-  <nav class="flex gap-5 px-4 sm:px-6 py-2 text-sm overflow-x-auto no-scrollbar bg-white">
+  <nav class="flex gap-4 sm:gap-5 px-3 sm:px-6 py-2 text-[13px] sm:text-sm overflow-x-auto no-scrollbar bg-white">
     <a href="index.html" class="whitespace-nowrap ${active === 'home' ? 'text-pink-500 font-semibold' : 'text-gray-600'}">Home</a>
     <a href="index.html?cat=flowers#shop" class="whitespace-nowrap text-gray-600">Flowers</a>
     <a href="index.html?cat=bouquets#shop" class="whitespace-nowrap text-gray-600">Bouquets</a>

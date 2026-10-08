@@ -25,4 +25,21 @@ input,select,textarea{outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--pink)!important;box-shadow:0 0 0 3px rgba(236,72,153,.15)}
 .drawer{transition:transform .3s ease}
 .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:.7rem 1.2rem;border-radius:12px;font-size:.85rem;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:.7rem 1.2rem;border-radius:12px;font-size:.85rem;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:90vw;text-align:center}
+
+/* ---------- every-screen fit ---------- */
+html{ -webkit-text-size-adjust:100%; }
+html,body{ overflow-x:hidden; }
+
+@media(max-width:640px){
+  input,select,textarea{ font-size:16px !important; } /* stops iPhone auto-zoom on focus */
+  .category-img{ height:160px; }
+  .gallery-main{ height:260px; border-radius:12px; }
+  .gallery-thumbs{ gap:8px; margin-top:10px; }
+  .gallery-thumbs img{ width:56px; height:56px; border-radius:8px; }
+  .product-tag{ font-size:.65rem; padding:3px 8px; top:8px; left:8px; }
+  .price-badge{ font-size:.7rem; padding:3px 8px; top:8px; right:8px; }
+  .product-price{ font-size:1.25rem; }
+  .btn-pink,.btn-outline{ padding:.65rem 1rem; font-size:.85rem; }
+  .toast{ bottom:14px; font-size:.8rem; }
+}
