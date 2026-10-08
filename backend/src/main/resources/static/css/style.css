@@ -7,9 +7,9 @@ img { max-width:100%; display:block; }
 .no-scrollbar{scrollbar-width:none}
 .card-hover{transition:transform .25s ease, box-shadow .25s ease}
 .card-hover:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(236,72,153,.15)}
-.category-img{width:100%;height:260px;object-fit:cover}
+.category-img{width:100%;height:260px;object-fit:contain;background:#fff}
 @media(max-width:640px){.category-img{height:180px}}
-.gallery-main{width:100%;height:420px;object-fit:cover;border-radius:16px}
+.gallery-main{width:100%;height:420px;object-fit:contain;background:#fff;border-radius:16px}
 @media(max-width:640px){.gallery-main{height:280px}}
 .gallery-thumbs{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
 .gallery-thumbs img{width:72px;height:72px;object-fit:cover;border-radius:10px;cursor:pointer;border:2px solid transparent}
@@ -33,8 +33,8 @@ html,body{ overflow-x:hidden; }
 
 @media(max-width:640px){
   input,select,textarea{ font-size:16px !important; } /* stops iPhone auto-zoom on focus */
-  .category-img{ height:160px; }
-  .gallery-main{ height:260px; border-radius:12px; }
+  .category-img{ height:200px; }
+  .gallery-main{ height:300px; border-radius:12px; }
   .gallery-thumbs{ gap:8px; margin-top:10px; }
   .gallery-thumbs img{ width:56px; height:56px; border-radius:8px; }
   .product-tag{ font-size:.65rem; padding:3px 8px; top:8px; left:8px; }

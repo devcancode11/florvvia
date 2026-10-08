@@ -28,14 +28,14 @@
     <div class="bg-white rounded-xl shadow p-4">
       <h3 class="font-medium text-sm mb-2">Add / edit address</h3>
       <input type="hidden" id="eId">
-      <div class="grid grid-cols-2 gap-2 text-sm">
+      <div class="grid grid-cols-1 min-[420px]:grid-cols-2 gap-2 text-sm">
         <input id="eLabel" placeholder="Label (Home/Work)" class="border rounded-lg px-3 py-2">
         <input id="eName" placeholder="Full name *" class="border rounded-lg px-3 py-2">
-        <input id="ePhone" placeholder="Phone" class="border rounded-lg px-3 py-2 col-span-2">
-        <input id="eLine1" placeholder="Address line 1 *" class="border rounded-lg px-3 py-2 col-span-2">
+        <input id="ePhone" placeholder="Phone" class="border rounded-lg px-3 py-2 min-[420px]:col-span-2">
+        <input id="eLine1" placeholder="Address line 1 *" class="border rounded-lg px-3 py-2 min-[420px]:col-span-2">
         <input id="eCity" placeholder="City" class="border rounded-lg px-3 py-2">
         <input id="ePin" placeholder="Pincode" class="border rounded-lg px-3 py-2">
-        <input id="eState" placeholder="State" class="border rounded-lg px-3 py-2 col-span-2">
+        <input id="eState" placeholder="State" class="border rounded-lg px-3 py-2 min-[420px]:col-span-2">
       </div>
       <div class="flex gap-2 mt-3">
         <button onclick="saveAddr()" class="btn-pink !py-2 text-sm flex-1">Save Address</button>
@@ -74,7 +74,7 @@ async function loadOrders() {
         <div class="flex justify-between flex-wrap gap-2"><b>${o.orderNo}</b><span class="px-2 py-0.5 rounded-full text-xs ${o.status === 'CANCELLED' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}">${o.status}</span></div>
         <p class="text-gray-500 text-xs">${new Date(o.createdAt).toLocaleString()} • ${o.paymentMode} • ${o.paymentStatus}</p>
         <p class="mt-1">${o.items.map(i => `${i.productName} ×${i.qty}`).join(', ')}</p>
-        <div class="flex justify-between mt-1"><span class="text-gray-500">${o.addressText || ''}</span><b class="text-pink-600">${money(o.total)}</b></div>
+        <div class="flex justify-between gap-2 mt-1"><span class="text-gray-500 break-words min-w-0">${o.addressText || ''}</span><b class="text-pink-600 flex-shrink-0">${money(o.total)}</b></div>
         <div class="flex gap-3 mt-2">
           <a target="_blank" href="${INSTA_URL}" class="text-xs text-pink-500 font-medium">Confirm on Instagram →</a>
           <a target="_blank" href="${o.whatsappLink || '#'}" class="text-xs text-green-600 font-medium">Notify us on WhatsApp →</a>

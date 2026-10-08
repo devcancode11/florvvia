@@ -42,34 +42,34 @@
     <div class="bg-white rounded-xl shadow p-4 mb-4">
       <h3 class="font-medium text-sm mb-2">➕ Add item / ✏️ Edit item</h3>
       <input type="hidden" id="pId">
-      <div class="grid md:grid-cols-3 gap-2 text-sm">
-        <input id="pName" placeholder="Name *" class="border rounded-lg px-3 py-2 md:col-span-2">
-        <select id="pCat" class="border rounded-lg px-3 py-2">
+      <div class="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+        <input id="pName" placeholder="Name *" class="border rounded-lg px-3 py-2.5 min-[420px]:col-span-2 md:col-span-2">
+        <select id="pCat" class="border rounded-lg px-3 py-2.5">
           <option value="flowers">Flowers</option>
           <option value="bouquets">Bouquets</option>
           <option value="keychains">Keychains & Clips</option>
         </select>
-        <input id="pPrice" type="number" min="0" placeholder="Price ₹ *" class="border rounded-lg px-3 py-2">
-        <input id="pMrp" type="number" min="0" placeholder="MRP ₹ (optional)" class="border rounded-lg px-3 py-2">
-        <select id="pTag" class="border rounded-lg px-3 py-2">
+        <input id="pPrice" type="number" min="0" placeholder="Price ₹ *" class="border rounded-lg px-3 py-2.5">
+        <input id="pMrp" type="number" min="0" placeholder="MRP ₹ (optional)" class="border rounded-lg px-3 py-2.5">
+        <select id="pTag" class="border rounded-lg px-3 py-2.5">
           <option value="">No tag</option>
           <option value="New">New</option>
           <option value="Bestseller">Bestseller</option>
         </select>
-        <input id="pCode" placeholder="Code (FL-XXX-01)" class="border rounded-lg px-3 py-2">
-        <input id="pStock" type="number" min="0" placeholder="Stock" value="100" class="border rounded-lg px-3 py-2">
-        <label class="flex items-center gap-2 text-sm text-gray-600"><input type="checkbox" id="pActive" checked class="w-4 h-4"> Visible in shop</label>
-        <input id="pImg" placeholder="Photo URL or /uploads/… or images/…" class="border rounded-lg px-3 py-2 md:col-span-2">
-        <div class="flex gap-2 items-center">
-          <input type="file" id="pFile" accept="image/*" class="text-xs">
-          <button onclick="uploadImg()" class="btn-outline !py-1 text-xs whitespace-nowrap">Upload photo</button>
+        <input id="pCode" placeholder="Code (FL-XXX-01)" class="border rounded-lg px-3 py-2.5">
+        <input id="pStock" type="number" min="0" placeholder="Stock" value="100" class="border rounded-lg px-3 py-2.5">
+        <label class="flex items-center gap-2 text-sm text-gray-600 min-[420px]:col-span-2 md:col-span-1"><input type="checkbox" id="pActive" checked class="w-5 h-5 accent-pink-500"> Visible in shop</label>
+        <input id="pImg" placeholder="Photo URL or /uploads/… or images/…" class="border rounded-lg px-3 py-2.5 min-w-0 min-[420px]:col-span-2 md:col-span-2">
+        <div class="flex flex-col min-[420px]:flex-row gap-2 min-[420px]:items-center min-[420px]:col-span-2 md:col-span-1">
+          <input type="file" id="pFile" accept="image/*" class="text-xs w-full min-w-0">
+          <button onclick="uploadImg()" class="btn-outline !py-2 text-xs whitespace-nowrap flex-shrink-0">Upload photo</button>
         </div>
-        <img id="pPreview" class="hidden w-full h-32 object-cover rounded-lg border md:col-span-1" alt="preview">
-        <textarea id="pDesc" placeholder="About this item (description)…" class="border rounded-lg px-3 py-2 md:col-span-3" rows="3"></textarea>
+        <img id="pPreview" class="hidden w-full h-44 object-contain bg-gray-50 rounded-lg border min-[420px]:col-span-2 md:col-span-1" alt="preview">
+        <textarea id="pDesc" placeholder="About this item (description)…" class="border rounded-lg px-3 py-2.5 min-[420px]:col-span-2 md:col-span-3" rows="3"></textarea>
       </div>
       <div class="flex gap-2 mt-3">
-        <button onclick="saveProduct()" class="btn-pink !py-2 text-sm flex-1">Save item</button>
-        <button onclick="clearP()" class="btn-outline !py-2 text-sm">Clear</button>
+        <button onclick="saveProduct()" class="btn-pink !py-2.5 text-sm flex-1">Save item</button>
+        <button onclick="clearP()" class="btn-outline !py-2.5 text-sm px-5">Clear</button>
       </div>
       <p class="text-xs text-gray-400 mt-1">New items appear in the shop immediately under their category.</p>
     </div>

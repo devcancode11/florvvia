@@ -54,7 +54,7 @@ async function init() {
       <div class="product-price mb-3">${money(P.price)} ${P.mrp ? `<span class="text-sm text-gray-400 line-through font-normal">${money(P.mrp)}</span>` : ''}</div>
       <p class="mb-4 text-sm leading-relaxed">${P.description || ''}</p>
       <p class="mb-4 text-sm font-medium">Custom colours & bouquet options available 🌸 • Delivery 3–5 days</p>
-      <div class="flex gap-2 mb-3">
+      <div class="flex flex-col min-[420px]:flex-row gap-2 mb-3">
         <button onclick="addToCart(P.id)" class="flex-1 btn-pink">Add to Cart 🛒</button>
         <button onclick="toggleWishlist(P.id)" class="btn-outline">♡ Wishlist</button>
       </div>
