@@ -27,7 +27,7 @@
 </header>
 
 <section class="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
-  <h1 class="text-xl sm:text-2xl font-semibold text-pink-500">Dashboard 🔐</h1>
+  <h1 class="text-xl sm:text-2xl font-semibold text-pink-500">Dashboard 🔐 <span class="text-[10px] font-normal text-gray-300">ui-v5</span></h1>
   <p class="text-xs text-gray-400 mb-3 sm:mb-4">Real orders, customers & items. Only admins can see this page.</p>
   <div id="stats" class="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 mb-5 sm:mb-6"></div>
 
@@ -230,6 +230,7 @@ function renderPhotos() {
       <img src="${imgUrl(u)}" class="w-full h-20 object-cover" onerror="${fb}">
       ${i === 0 ? '<span class="absolute top-1 left-1 bg-pink-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">Cover</span>' : ''}
       <button onclick="delPhoto(${i})" aria-label="Remove" class="absolute top-1 right-1 bg-black/50 text-white text-xs w-5 h-5 rounded-full leading-none">✕</button>
+      <p class="px-1 py-0.5 text-[9px] text-gray-400 truncate" title="${u}">${String(u).split('/').pop()}</p>
       <div class="flex text-[10px] border-t">
         ${i === 0 ? '' : `<button onclick="coverPhoto(${i})" class="flex-1 py-1.5 text-pink-600 font-medium">Cover</button>`}
         <button onclick="openCrop(${i})" class="flex-1 py-1.5 text-gray-600">Crop ✂️</button>

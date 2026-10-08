@@ -40,7 +40,7 @@ public class MiscController {
       String orig = file.getOriginalFilename() == null ? "img" : file.getOriginalFilename();
       int dot = orig.lastIndexOf('.');
       if (dot >= 0) ext = orig.substring(dot);
-      String name = "p-" + System.currentTimeMillis() + ext;
+      String name = "p-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 8) + ext;
       Files.copy(file.getInputStream(), dir.resolve(name), StandardCopyOption.REPLACE_EXISTING);
       return ResponseEntity.ok(Map.of("url", "/uploads/" + name));
     } catch (Exception e) {
