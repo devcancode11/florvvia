@@ -219,16 +219,23 @@ function renderPhotos() {
   const g = document.getElementById('phGrid');
   if (!g) return;
   document.getElementById('phCount').textContent = PHOTOS.length;
-  g.innerHTML = PHOTOS.map((u, i) => `
+  g.innerHTML = PHOTOS.map((u, i) => {
+    // If the API-prefixed URL fails (e.g. stale saved backend), retry the raw same-origin path before giving up.
+    const rawOk = typeof u === 'string' && /^\/[A-Za-z0-9._\/-]+$/.test(u);
+    const fb = rawOk
+      ? `if(!this.dataset.f){this.dataset.f=1;this.src='${u}'}else{this.onerror=null;this.src='images/flowers/flower1.jpg'}`
+      : `this.onerror=null;this.src='images/flowers/flower1.jpg'`;
+    return `
     <div class="relative bg-white border rounded-lg overflow-hidden">
-      <img src="${imgUrl(u)}" class="w-full h-20 object-cover" onerror="this.src='images/flowers/flower1.jpg'">
+      <img src="${imgUrl(u)}" class="w-full h-20 object-cover" onerror="${fb}">
       ${i === 0 ? '<span class="absolute top-1 left-1 bg-pink-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">Cover</span>' : ''}
       <button onclick="delPhoto(${i})" aria-label="Remove" class="absolute top-1 right-1 bg-black/50 text-white text-xs w-5 h-5 rounded-full leading-none">✕</button>
       <div class="flex text-[10px] border-t">
         ${i === 0 ? '' : `<button onclick="coverPhoto(${i})" class="flex-1 py-1.5 text-pink-600 font-medium">Cover</button>`}
         <button onclick="openCrop(${i})" class="flex-1 py-1.5 text-gray-600">Crop ✂️</button>
       </div>
-    </div>`).join('') || '<p class="text-xs text-gray-400 col-span-full py-2 text-center">No photos yet — upload or paste a URL above.</p>';
+    </div>`;
+  }).join('') || '<p class="text-xs text-gray-400 col-span-full py-2 text-center">No photos yet — upload or paste a URL above.</p>';
 }
 
 function delPhoto(i) { PHOTOS.splice(i, 1); renderPhotos(); }
@@ -237,8 +244,18 @@ function coverPhoto(i) { const u = PHOTOS.splice(i, 1)[0]; PHOTOS.unshift(u); re
 async function uploadFiles(files) {
   for (const f of files) {
     try {
-      toast('Uploading ' + f.name + '…');
-      const fd = new FormData(); fd.append('file', f);
+      // Phones often produce HEIC/huge files browsers can't preview —
+      // normalize to a browser-safe JPEG (capped size) before uploading.
+      let blob = f, name = f.name || 'photo.jpg';
+      const webSafe = /^image\/(jpeg|png|webp|gif)$/i.test(f.type || '');
+      if (!webSafe || (f.size || 0) > 2.5 * 1024 * 1024) {
+        toast('Preparing ' + name + '…');
+        blob = await fileToJpeg(f);
+        name = (name.replace(/\.[^.]+$/, '') || 'photo') + '.jpg';
+      } else {
+        toast('Uploading ' + name + '…');
+      }
+      const fd = new FormData(); fd.append('file', blob, name);
       const res = await fetch(API.base + '/api/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + API.token() }, body: fd });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || 'Upload failed');
@@ -246,6 +263,29 @@ async function uploadFiles(files) {
     } catch (e) { toast(e.message); }
   }
   toast(`Photos ready ✅ (${PHOTOS.length})`);
+}
+
+function fileToJpeg(file, maxDim = 1600) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        const scale = Math.min(1, maxDim / Math.max(w, h));
+        w = Math.max(1, Math.round(w * scale)); h = Math.max(1, Math.round(h * scale));
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); // white backdrop (no black from transparency)
+        ctx.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        c.toBlob(b => b ? res(b) : rej(new Error('Could not read this photo — use JPG or PNG')), 'image/jpeg', 0.85);
+      } catch (e) { URL.revokeObjectURL(url); rej(e); }
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Unsupported photo format — please choose JPG or PNG')); };
+    img.src = url;
+  });
 }
 
 function addUrlPhoto() {
@@ -262,13 +302,22 @@ function openCrop(i) {
   cropIdx = i;
   const img = document.getElementById('cropImg');
   document.getElementById('cropModal').classList.add('hidden');
+  delete img.dataset.fbk;
   img.onload = () => {
     cropNat = { w: img.naturalWidth, h: img.naturalHeight };
     document.getElementById('cropRatio').value = 'free';
     document.getElementById('cropModal').classList.remove('hidden');
     requestAnimationFrame(initBox);
   };
-  img.onerror = () => toast('Could not load this photo for editing');
+  img.onerror = () => {
+    // Same retry as the overview: stale API host → try the raw same-origin path.
+    const raw = PHOTOS[cropIdx];
+    if (typeof raw === 'string' && raw.startsWith('/') && img.getAttribute('src') !== raw && !img.dataset.fbk) {
+      img.dataset.fbk = '1';
+      try { img.removeAttribute('crossorigin'); } catch {}
+      img.src = raw;
+    } else toast('Could not load this photo for editing');
+  };
   try { img.crossOrigin = 'anonymous'; } catch {}
   img.src = imgUrl(PHOTOS[i]);
 }
