@@ -59,12 +59,18 @@
         <input id="pCode" placeholder="Code (FL-XXX-01)" class="border rounded-lg px-3 py-2.5">
         <input id="pStock" type="number" min="0" placeholder="Stock" value="100" class="border rounded-lg px-3 py-2.5">
         <label class="flex items-center gap-2 text-sm text-gray-600 min-[420px]:col-span-2 md:col-span-1"><input type="checkbox" id="pActive" checked class="w-5 h-5 accent-pink-500"> Visible in shop</label>
-        <input id="pImg" placeholder="Photo URL or /uploads/… or images/…" class="border rounded-lg px-3 py-2.5 min-w-0 min-[420px]:col-span-2 md:col-span-2">
-        <div class="flex flex-col min-[420px]:flex-row gap-2 min-[420px]:items-center min-[420px]:col-span-2 md:col-span-1">
-          <input type="file" id="pFile" accept="image/*" class="text-xs w-full min-w-0">
-          <button onclick="uploadImg()" class="btn-outline !py-2 text-xs whitespace-nowrap flex-shrink-0">Upload photo</button>
+        <!-- PHOTOS: multi-upload + live overview + crop -->
+        <div class="min-[420px]:col-span-2 md:col-span-3 border rounded-lg p-2 bg-pink-50/50">
+          <p class="text-xs font-medium text-gray-500 mb-2">📷 Photos (<span id="phCount">0</span>) — first photo is the cover. Tap Crop to edit any photo.</p>
+          <div id="phGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-2"></div>
+          <div class="flex flex-col min-[420px]:flex-row gap-2">
+            <label class="btn-outline !py-2 text-xs text-center cursor-pointer flex-1 whitespace-nowrap">📤 Upload photos<input type="file" id="pFiles" accept="image/*" multiple class="hidden"></label>
+            <div class="flex gap-2 flex-[2]">
+              <input id="pUrl" placeholder="…or paste image URL + Enter" class="flex-1 min-w-0 border rounded-lg px-3 py-2 text-xs bg-white">
+              <button onclick="addUrlPhoto()" class="btn-outline !py-2 text-xs flex-shrink-0">Add</button>
+            </div>
+          </div>
         </div>
-        <img id="pPreview" class="hidden w-full h-44 object-contain bg-gray-50 rounded-lg border min-[420px]:col-span-2 md:col-span-1" alt="preview">
         <textarea id="pDesc" placeholder="About this item (description)…" class="border rounded-lg px-3 py-2.5 min-[420px]:col-span-2 md:col-span-3" rows="3"></textarea>
       </div>
       <div class="flex gap-2 mt-3">
@@ -92,6 +98,33 @@
   <!-- CUSTOMERS: real customer data (name, email, phone, addresses) -->
   <div id="customers" class="hidden space-y-4"></div>
 </section>
+
+<!-- CROP EDITOR -->
+<div id="cropModal" class="hidden fixed inset-0 z-[100] bg-black/70 flex items-center justify-center p-3">
+  <div class="bg-white rounded-2xl p-3 sm:p-4 w-full max-w-lg">
+    <h3 class="font-medium text-sm mb-2">Crop photo ✂️ <span class="text-gray-400 font-normal">— drag the box, pull the pink dot to resize</span></h3>
+    <div class="mx-auto overflow-hidden bg-gray-100 rounded-lg" style="width:fit-content;max-width:100%">
+      <div id="cropStage" class="relative touch-none select-none">
+        <img id="cropImg" class="block max-w-full" style="max-height:60vh" draggable="false" alt="crop">
+        <div id="cropBox" class="absolute border-2 border-pink-500 bg-pink-500/10" style="touch-action:none">
+          <div id="cropHandle" class="absolute -bottom-2.5 -right-2.5 w-7 h-7 bg-pink-500 border-2 border-white rounded-full cursor-nwse-resize shadow"></div>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 mt-3 text-xs flex-wrap">
+      <select id="cropRatio" class="border rounded-full px-2 py-2">
+        <option value="free">Free size</option>
+        <option value="1">Square 1:1</option>
+        <option value="0.75">Portrait 3:4</option>
+        <option value="1.3333">Landscape 4:3</option>
+      </select>
+      <div class="flex gap-2 ml-auto">
+        <button onclick="closeCrop()" class="btn-outline !py-2 text-xs">Cancel</button>
+        <button onclick="applyCrop()" class="btn-pink !py-2 text-xs">Apply crop ✅</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="js/config.js"></script>
 <script src="js/common.js"></script>
@@ -128,7 +161,7 @@ async function init() {
   try {
     paintStats(await API.get('/api/admin/stats'));
   } catch (e) { toast(e.message); }
-  document.getElementById('pImg').addEventListener('input', previewImg);
+  wirePhotoInputs();
   PRODS = await API.get('/api/products').catch(() => []);
   renderProducts();
   // 🔔 order notifications: remember latest order, then poll for new ones
@@ -168,10 +201,170 @@ async function pollNewOrders() {
   } catch {}
 }
 
-function previewImg() {
-  const v = document.getElementById('pImg').value.split(',')[0].trim();
-  const img = document.getElementById('pPreview');
-  if (v) { img.src = imgUrl(v); img.classList.remove('hidden'); } else img.classList.add('hidden');
+/* ---------- photos: multi-upload, live overview, crop ---------- */
+let PHOTOS = [];
+
+function wirePhotoInputs() {
+  renderPhotos();
+  document.getElementById('pFiles').addEventListener('change', e => {
+    if (e.target.files.length) uploadFiles(e.target.files);
+    e.target.value = ''; // allow picking the next batch right away
+  });
+  document.getElementById('pUrl').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addUrlPhoto(); }
+  });
+}
+
+function renderPhotos() {
+  const g = document.getElementById('phGrid');
+  if (!g) return;
+  document.getElementById('phCount').textContent = PHOTOS.length;
+  g.innerHTML = PHOTOS.map((u, i) => `
+    <div class="relative bg-white border rounded-lg overflow-hidden">
+      <img src="${imgUrl(u)}" class="w-full h-20 object-cover" onerror="this.src='images/flowers/flower1.jpg'">
+      ${i === 0 ? '<span class="absolute top-1 left-1 bg-pink-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">Cover</span>' : ''}
+      <button onclick="delPhoto(${i})" aria-label="Remove" class="absolute top-1 right-1 bg-black/50 text-white text-xs w-5 h-5 rounded-full leading-none">✕</button>
+      <div class="flex text-[10px] border-t">
+        ${i === 0 ? '' : `<button onclick="coverPhoto(${i})" class="flex-1 py-1.5 text-pink-600 font-medium">Cover</button>`}
+        <button onclick="openCrop(${i})" class="flex-1 py-1.5 text-gray-600">Crop ✂️</button>
+      </div>
+    </div>`).join('') || '<p class="text-xs text-gray-400 col-span-full py-2 text-center">No photos yet — upload or paste a URL above.</p>';
+}
+
+function delPhoto(i) { PHOTOS.splice(i, 1); renderPhotos(); }
+function coverPhoto(i) { const u = PHOTOS.splice(i, 1)[0]; PHOTOS.unshift(u); renderPhotos(); }
+
+async function uploadFiles(files) {
+  for (const f of files) {
+    try {
+      toast('Uploading ' + f.name + '…');
+      const fd = new FormData(); fd.append('file', f);
+      const res = await fetch(API.base + '/api/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + API.token() }, body: fd });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error || 'Upload failed');
+      PHOTOS.push(j.url); renderPhotos(); // each photo is ready for crop/delete the moment it lands
+    } catch (e) { toast(e.message); }
+  }
+  toast(`Photos ready ✅ (${PHOTOS.length})`);
+}
+
+function addUrlPhoto() {
+  const inp = document.getElementById('pUrl');
+  const v = inp.value.trim();
+  if (!v) { toast('Paste an image URL first'); return; }
+  PHOTOS.push(v); inp.value = ''; renderPhotos();
+}
+
+/* ----- crop editor (drag box + corner resize + aspect lock) ----- */
+let cropIdx = -1, cropNat = { w: 0, h: 0 };
+
+function openCrop(i) {
+  cropIdx = i;
+  const img = document.getElementById('cropImg');
+  document.getElementById('cropModal').classList.add('hidden');
+  img.onload = () => {
+    cropNat = { w: img.naturalWidth, h: img.naturalHeight };
+    document.getElementById('cropRatio').value = 'free';
+    document.getElementById('cropModal').classList.remove('hidden');
+    requestAnimationFrame(initBox);
+  };
+  img.onerror = () => toast('Could not load this photo for editing');
+  try { img.crossOrigin = 'anonymous'; } catch {}
+  img.src = imgUrl(PHOTOS[i]);
+}
+
+function closeCrop() { document.getElementById('cropModal').classList.add('hidden'); }
+
+function boxEl() { return document.getElementById('cropBox'); }
+
+function initBox() {
+  const img = document.getElementById('cropImg');
+  const stage = document.getElementById('cropStage');
+  const w = img.clientWidth, h = img.clientHeight;
+  if (!w || !h) return;
+  stage.style.width = w + 'px';
+  stage.style.height = h + 'px';
+  const bw = w * 0.85, bh = h * 0.85;
+  Object.assign(boxEl().style, { left: ((w - bw) / 2) + 'px', top: ((h - bh) / 2) + 'px', width: bw + 'px', height: bh + 'px' });
+}
+
+function cropRatioVal() {
+  const v = document.getElementById('cropRatio').value;
+  return v === 'free' ? 0 : parseFloat(v); // width / height
+}
+
+(function wireCrop() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const box = document.getElementById('cropBox');
+    const stage = document.getElementById('cropStage');
+    if (!box || !stage) return;
+    let mode = null, sx = 0, sy = 0, start = null;
+
+    box.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      mode = (e.target.id === 'cropHandle') ? 'resize' : 'move';
+      sx = e.clientX; sy = e.clientY;
+      start = { l: box.offsetLeft, t: box.offsetTop, w: box.offsetWidth, h: box.offsetHeight };
+      box.setPointerCapture(e.pointerId);
+    });
+    box.addEventListener('pointermove', e => {
+      if (!mode || !start) return;
+      const dx = e.clientX - sx, dy = e.clientY - sy;
+      const maxW = stage.clientWidth, maxH = stage.clientHeight;
+      const ratio = cropRatioVal();
+      if (mode === 'move') {
+        const nl = Math.min(Math.max(0, start.l + dx), maxW - start.w);
+        const nt = Math.min(Math.max(0, start.t + dy), maxH - start.h);
+        box.style.left = nl + 'px'; box.style.top = nt + 'px';
+      } else {
+        let nw = Math.min(Math.max(30, start.w + dx), maxW - start.l);
+        let nh = ratio ? nw / ratio : Math.min(Math.max(30, start.h + dy), maxH - start.t);
+        if (ratio) {
+          if (start.t + nh > maxH) { nh = maxH - start.t; nw = nh * ratio; }
+          if (start.l + nw > maxW) { nw = maxW - start.l; nh = nw / ratio; }
+        }
+        box.style.width = nw + 'px'; box.style.height = nh + 'px';
+      }
+    });
+    const stop = () => { mode = null; start = null; };
+    box.addEventListener('pointerup', stop);
+    box.addEventListener('pointercancel', stop);
+
+    document.getElementById('cropRatio').addEventListener('change', () => {
+      // refit the box to the new aspect, keeping its centre
+      const ratio = cropRatioVal();
+      if (!ratio) return;
+      const cx = box.offsetLeft + box.offsetWidth / 2, cy = box.offsetTop + box.offsetHeight / 2;
+      let nw = box.offsetWidth, nh = nw / ratio;
+      if (cy + nh / 2 > stage.clientHeight) { nh = (stage.clientHeight - cy) * 2; nw = nh * ratio; }
+      if (cx + nw / 2 > stage.clientWidth) { nw = (stage.clientWidth - cx) * 2; nh = nw / ratio; }
+      box.style.width = nw + 'px'; box.style.height = nh + 'px';
+      box.style.left = (cx - nw / 2) + 'px'; box.style.top = (cy - nh / 2) + 'px';
+    });
+  });
+})();
+
+async function applyCrop() {
+  try {
+    const img = document.getElementById('cropImg');
+    const box = boxEl();
+    const scaleX = cropNat.w / img.clientWidth, scaleY = cropNat.h / img.clientHeight;
+    const sx = box.offsetLeft * scaleX, sy = box.offsetTop * scaleY;
+    const sw = box.offsetWidth * scaleX, sh = box.offsetHeight * scaleY;
+    if (sw < 10 || sh < 10) { toast('Crop area too small'); return; }
+    const c = document.createElement('canvas');
+    c.width = Math.round(sw); c.height = Math.round(sh);
+    c.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, c.width, c.height);
+    const blob = await new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('Crop failed')), 'image/jpeg', 0.85));
+    const fd = new FormData();
+    fd.append('file', blob, 'crop-' + Date.now() + '.jpg');
+    toast('Saving cropped photo…');
+    const r = await fetch(API.base + '/api/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + API.token() }, body: fd });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'Upload failed');
+    PHOTOS[cropIdx] = j.url; renderPhotos(); closeCrop();
+    toast('Cropped ✅');
+  } catch (e) { toast('Crop failed — web-linked images may block editing; upload the photo instead.'); }
 }
 
 /* ---------- products: add + edit photo/about/price/etc ---------- */
@@ -212,50 +405,34 @@ function editP(id) {
   g('pCode').value = p.code || '';
   g('pStock').value = p.stock ?? 100;
   g('pActive').checked = p.active !== false;
-  g('pImg').value = (p.images || []).join(', ');
   g('pDesc').value = p.description || '';
-  previewImg();
+  PHOTOS = [...(p.images || [])]; renderPhotos(); // overview: every photo editable
   window.scrollTo({ top: 0, behavior: 'smooth' });
   toast('Editing: ' + p.name);
 }
 
 function clearP() {
-  ['pId', 'pName', 'pPrice', 'pMrp', 'pTag', 'pCode', 'pImg', 'pDesc'].forEach(i => document.getElementById(i).value = '');
+  ['pId', 'pName', 'pPrice', 'pMrp', 'pTag', 'pCode', 'pDesc'].forEach(i => document.getElementById(i).value = '');
   document.getElementById('pStock').value = 100;
   document.getElementById('pCat').value = 'flowers';
   document.getElementById('pActive').checked = true;
-  document.getElementById('pPreview').classList.add('hidden');
-}
-
-async function uploadImg() {
-  const f = document.getElementById('pFile').files[0];
-  if (!f) { toast('Choose a photo first'); return; }
-  const fd = new FormData(); fd.append('file', f);
-  try {
-    const res = await fetch(API.base + '/api/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + API.token() }, body: fd });
-    const j = await res.json();
-    if (!res.ok) throw new Error(j.error || 'Upload failed');
-    const cur = document.getElementById('pImg').value.trim();
-    document.getElementById('pImg').value = cur ? cur + ', ' + j.url : j.url;
-    previewImg();
-    toast('Photo uploaded ✅');
-  } catch (e) { toast(e.message); }
+  PHOTOS = []; renderPhotos();
 }
 
 async function saveProduct() {
   const g = (i) => document.getElementById(i).value;
-  const imgs = g('pImg').split(',').map(s => s.trim()).filter(Boolean);
   const cat = (document.getElementById('pCat').value || 'flowers').toLowerCase();
-  if (!['flowers', 'bouquets', 'keychains'].includes(cat)) { toast('Category must be Flowers, Bouquets or Keychains'); return; }
+  if (!['flowers', 'bouquets', 'keychains'].includes(cat)) { toast('Category must be Flowers, Bouquets or Keychains & Clips'); return; }
   const body = {
     name: g('pName').trim(), category: cat,
     price: +g('pPrice') || 0, mrp: g('pMrp') ? +g('pMrp') : null,
     tag: g('pTag') || null, code: g('pCode') || null,
     stock: g('pStock') === '' ? 100 : (+g('pStock') || 0),
-    images: imgs, description: g('pDesc'),
+    images: [...PHOTOS], description: g('pDesc'),
     active: document.getElementById('pActive').checked
   };
   if (!body.name || !body.price) { toast('Name + price required'); return; }
+  if (!body.images.length) { toast('Add at least one photo 📷'); return; }
   try {
     const id = document.getElementById('pId').value;
     if (id) await API.put('/api/products/' + id, body);
